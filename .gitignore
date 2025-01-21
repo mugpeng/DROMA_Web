@@ -1,0 +1,13 @@
+# ignore
+# file
+.Rhistory
+.Rproj.user
+.DS_Store
+# dir
+/Input
+/Output
+/Log
+/rsconnect
+/Others
+/Test
+/Package_Function/Others

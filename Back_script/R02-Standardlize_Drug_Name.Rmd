@@ -1,0 +1,288 @@
+```{r library, include=FALSE}
+my_packages <- c("tidyverse", "data.table",
+                 "stringdist")
+pacman::p_load(char = my_packages)
+
+tmp <- list()
+```
+
+Each drug test platform has its own name system which may induce name duplication.
+
+# Load data
+```{r}
+load(file = "Output/01/drug.Rda")
+load(file = "Output/01/drug_anno.Rda")
+```
+
+# CCLE anno
+```{r}
+ccle_drug_anno <- fread("Input/Raw/DrugAnno/Repurposing_Hub_export.txt")
+ccle_drug_anno$Name <- toupper(ccle_drug_anno$Name)
+```
+
+# Rename gdsc
+GDSC anno file `DRUG_NAME2` col will be used as concensus drug name.
+We will rename drug name in gdsc1/2 to be corresponded with gdsc anno file. 
+
+GDSC1:
+```{r}
+tmp_df <- merge(
+  data.frame(
+    old = rownames(gdsc1_drug)
+  ), gdsc_drug_anno2[,c(1,6)], by = "old", all.x = T
+) %>% unique()
+tmp_df <- tmp_df[match(rownames(gdsc1_drug), tmp_df$old),]
+rownames(gdsc1_drug)[!is.na(tmp_df$DRUG_NAME2)] <- tmp_df$DRUG_NAME2[!is.na(tmp_df$DRUG_NAME2)]
+
+table(rownames(gdsc1_drug) %in% gdsc_drug_anno2$DRUG_NAME2)
+```
+
+GDSC2:
+```{r}
+tmp_df <- merge(
+  data.frame(
+    old = rownames(gdsc2_drug)
+  ), gdsc_drug_anno2[,c(1,6)], by = "old", all.x = T
+) %>% unique()
+tmp_df <- tmp_df[match(rownames(gdsc2_drug), tmp_df$old),]
+rownames(gdsc2_drug)[!is.na(tmp_df$DRUG_NAME2)] <- tmp_df$DRUG_NAME2[!is.na(tmp_df$DRUG_NAME2)]
+
+table(rownames(gdsc2_drug) %in% gdsc_drug_anno2$DRUG_NAME2)
+```
+
+```{r}
+cat(rownames(gdsc2_drug)[!rownames(gdsc2_drug) %in% gdsc_drug_anno2$DRUG_NAME2],
+    sep = ", ")
+```
+
+
+```{r}
+gdsc_drug_anno3 <- unique(gdsc_drug_anno2[,-c(2,6)])
+colnames(gdsc_drug_anno3)[1] <- "DRUG_NAME"
+
+# gdsc_drug_anno2 <- fread("Input/Raw/DrugAnno/gdsc_screened_compounds_rel_8.4.csv")
+# gdsc_drug_anno2 <- unique(gdsc_drug_anno2[,-c(1:2)])
+# gdsc_drug_anno2$DRUG_NAME <- toupper(gdsc_drug_anno2$DRUG_NAME)
+gdsc_drug_anno <- gdsc_drug_anno3
+```
+
+# Basic fix
+```{r}
+# basicFixName <- function(df){
+#   rownames(df) <- toupper(rownames(df))
+#   rownames(df) <- gsub("-", "", rownames(df))
+#   rownames(df) <- gsub(" ", "", rownames(df))
+#   return(df)
+# }
+```
+
+```{r}
+tmp$list <- list(
+  ctrp1 = rownames(ctrp1_drug),
+  ctrp2 = rownames(ctrp2_drug),
+  prism = rownames(prism_drug),
+  gCSI = rownames(gCSI_drug)
+)
+```
+
+```{r}
+rownames(ctrp1_drug) <- toupper(rownames(ctrp1_drug))
+rownames(ctrp2_drug) <- toupper(rownames(ctrp2_drug))
+rownames(prism_drug) <- toupper(rownames(prism_drug))
+rownames(gCSI_drug) <- toupper(rownames(gCSI_drug))
+```
+
+# Remove duplicate
+```{r}
+drug_names <- unique(
+              c(rownames(gdsc1_drug), 
+                rownames(gdsc2_drug),
+                rownames(prism_drug)
+                )
+              )
+```
+
+
+```{r}
+all_drug_df <- data.frame(
+  drugs = c(rownames(ctrp1_drug),rownames(ctrp2_drug), rownames(prism_drug),
+            rownames(gCSI_drug), rownames(gdsc1_drug),
+            rownames(gdsc2_drug)),
+  type = c(rep("ctrp1", nrow(ctrp1_drug)),
+           rep("ctrp2", nrow(ctrp2_drug)),
+           rep("prism", nrow(prism_drug)),
+           rep("gCSI", nrow(gCSI_drug)),
+           rep("gdsc1", nrow(gdsc1_drug)),
+           rep("gdsc2", nrow(gdsc2_drug))
+           )
+)
+all_drug_df2 <- data.frame(drugs = unique(all_drug_df$drugs),
+                           index = as.character( 1:length(unique(all_drug_df$drugs))))
+```
+
+## stringdist
+```{r}
+all_drug_dist_df1 <- stringdistmatrix(
+  all_drug_df2$drugs, all_drug_df2$drugs, method = "osa"
+)
+# all_drug_dist_df2 <- stringdistmatrix(
+#   all_drug_df2$drugs, all_drug_df2$drugs, method = "lv"
+# )
+# all_drug_dist_df3 <- stringdistmatrix(
+#   all_drug_df2$drugs, all_drug_df2$drugs, method = "hamming"
+# )
+
+# all_drug_dist_df1_1 <- as.data.frame(all_drug_dist_df1)
+
+all_drug_dist_df1_sel <- all_drug_dist_df1 < 2 & all_drug_dist_df1 > 0
+```
+
+Set triangle matrix to remove duplicates:
+```{r}
+upper <- which(upper.tri(all_drug_dist_df1_sel), arr.ind = TRUE)
+all_drug_dist_df1_sel[upper] <- F
+```
+
+
+```{r}
+simi_drug <- list()
+for(x in 1:ncol(all_drug_dist_df1_sel)){
+  index1 = x
+  index2 = which(all_drug_dist_df1_sel[,x])
+  simi_drug[[x]] <- c(all_drug_df2$drugs[index1],
+                      all_drug_df2$drugs[index2])
+}
+simi_drug2 <- simi_drug[which(sapply(simi_drug, length) > 1)]
+
+a <- sapply(simi_drug2, function(x){sum(grepl("-",x)) == 1})
+simi_drug3 <- simi_drug2[a]
+```
+
+## Rename
+If name in gdsc_drug_anno, then the name in ccle_drug_anno and drug files will be renamed. Then in ccle_drug_anno, rename it. Then in gdsc drug files, then name it. Lastly, follow the major name.
+```{r}
+for(i in simi_drug3){
+  # i = simi_drug3[[1]]
+  a1 <- colSums(sapply(i, function(x){grepl(x, gdsc_drug_anno$DRUG_NAME)}))
+  a2 <- colSums(sapply(i, function(x){grepl(x , ccle_drug_anno$Name)}))
+  if(sum(a1) > 0){
+    a22 <- names(a2)[which(as.logical(a2))]
+    a23 <- names(a2)[which(as.logical(a1))]
+    # Rename ccle anno
+    ccle_drug_anno$Name[ccle_drug_anno$Name %in% a22] <- a23
+    # Rename drugs
+    rownames(ctrp1_drug)[rownames(ctrp1_drug) %in% a22] <- a23
+    rownames(ctrp2_drug)[rownames(ctrp2_drug) %in% a22] <- a23
+    rownames(prism_drug)[rownames(prism_drug) %in% a22] <- a23
+    rownames(gCSI_drug)[rownames(gCSI_drug) %in% a22] <- a23
+    rownames(gdsc1_drug)[rownames(gdsc1_drug) %in% a22] <- a23
+    rownames(gdsc2_drug)[rownames(gdsc2_drug) %in% a22] <- a23
+  } else if (sum(a2) > 0) {
+    a22 <- names(a2)[which(!as.logical(a2))]
+    a23 <- names(a2)[which(as.logical(a2))]
+    # Rename drugs
+    rownames(ctrp1_drug)[rownames(ctrp1_drug) %in% a22] <- a23
+    rownames(ctrp2_drug)[rownames(ctrp2_drug) %in% a22] <- a23
+    rownames(prism_drug)[rownames(prism_drug) %in% a22] <- a23
+    rownames(gCSI_drug)[rownames(gCSI_drug) %in% a22] <- a23
+    rownames(gdsc1_drug)[rownames(gdsc1_drug) %in% a22] <- a23
+    rownames(gdsc2_drug)[rownames(gdsc2_drug) %in% a22] <- a23
+  } else {
+    # 
+  }
+}
+```
+
+## check rename
+```{r}
+all_drug_df2 <- data.frame(
+  drugs = c(rownames(ctrp1_drug),rownames(ctrp2_drug), rownames(prism_drug),
+            rownames(gCSI_drug), rownames(gdsc1_drug),
+            rownames(gdsc2_drug)),
+  type = c(rep("ctrp1", nrow(ctrp1_drug)),
+           rep("ctrp2", nrow(ctrp2_drug)),
+           rep("prism", nrow(prism_drug)),
+           rep("gCSI", nrow(gCSI_drug)),
+           rep("gdsc1", nrow(gdsc1_drug)),
+           rep("gdsc2", nrow(gdsc2_drug))
+           )
+)
+# all_drug_df2 <- data.frame(drugs = unique(all_drug_df$drugs),
+#                            index = as.character( 1:length(unique(all_drug_df$drugs))))
+```
+
+# Rescale drugs
+lower metric means higher sensitivity.
+
+Follow the less change principle:
+```{r}
+gCSI_drug2 <- as.matrix(gCSI_drug)
+# gCSI_drug2[gCSI_drug2 %in% 0] <- NA
+gCSI_drug2 <- apply(gCSI_drug2, 2, function(x){
+    tmp <- -x
+    tmp <- tmp - min(tmp, na.rm = T)
+  })
+gCSI_drug <- as.data.frame(gCSI_drug2)
+```
+gCSI_drug AAC >> -x - min(-x)
+
+# Rename drugs
+```{r}
+rownames(gdsc1_drug)[rownames(gdsc1_drug) %in% "SEPANTRONIUM BROMIDE"] <- "YM-155"
+rownames(gdsc2_drug)[rownames(gdsc2_drug) %in% "SEPANTRONIUM BROMIDE"] <- "YM-155"
+```
+
+
+# Others
+```{r}
+# ccle_drug_anno$Name <- gsub("-", "", ccle_drug_anno$Name)
+# ccle_drug_anno$Name <- gsub(" ", "", ccle_drug_anno$Name)
+```
+
+```{r}
+table(rownames(ctrp1_drug) %in% ccle_drug_anno$Name)
+
+# table(tmp$list$ctrp1 %in% ccle_drug_anno$Name)
+```
+
+```{r}
+# fwrite(gdsc_drug_anno, file = "Tmpout/tmp/gdsc_drug_anno.csv")
+# fwrite(ccle_drug_anno, file = "Tmpout/tmp/ccle_drug_anno.csv")
+```
+
+## Check cell names
+```{r}
+all_cell_df2 <- data.frame(
+  cells = c(colnames(ctrp1_drug),colnames(ctrp2_drug), colnames(prism_drug),
+            colnames(gCSI_drug), colnames(gdsc1_drug),
+            colnames(gdsc2_drug)),
+  type = c(rep("ctrp1", ncol(ctrp1_drug)),
+           rep("ctrp2", ncol(ctrp2_drug)),
+           rep("prism", ncol(prism_drug)),
+           rep("gCSI", ncol(gCSI_drug)),
+           rep("gdsc1", ncol(gdsc1_drug)),
+           rep("gdsc2", ncol(gdsc2_drug))
+           )
+)
+```
+
+# Save
+Resave formatted and renamed drug mtx and drug anno df:
+```{r}
+save(
+  gdsc_drug_anno,
+  ccle_drug_anno,
+  file = "Output/02/drug_anno.Rda"
+)
+
+save(
+  prism_drug,
+  ctrp1_drug,
+  ctrp2_drug,
+  gCSI_drug,
+  gdsc1_drug,
+  gdsc2_drug,
+  file = "Output/02/drug2.Rda"
+)
+```
+

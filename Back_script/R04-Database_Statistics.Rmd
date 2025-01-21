@@ -1,0 +1,254 @@
+```{r library, include=FALSE}
+my_packages <- c("tidyverse", "data.table",
+                 "ggpubr", "UpSetR")
+pacman::p_load(char = my_packages)
+
+tmp <- list()
+```
+
+# load data
+```{r}
+load("Output/01/exp.Rda")
+load("Output/01/cnv.Rda")
+load("Output/01/meth.Rda") 
+load("Output/01/protein.Rda")
+load("Output/01/fusion.Rda")
+load("Output/01/mut.Rda")
+load("Output/01/cell_anno.Rda")
+
+load("Output/02/drug.Rda")
+load("Output/02/drug_anno.Rda")
+```
+
+# Check overlaps
+drugs:
+```{r}
+drug_list <- list(
+    gdsc1 = rownames(gdsc1_drug),
+    gdsc2 = rownames(gdsc2_drug),
+    ctrp1 = rownames(ctrp1_drug),
+    ctrp2 = rownames(ctrp2_drug),
+    prism = rownames(prism_drug),
+    gCSI = rownames(gCSI_drug)
+  )
+
+# ggvenn::ggvenn(
+#   drug_list
+# )
+
+cell_list <- list(
+    gdsc1 = colnames(gdsc1_drug),
+    gdsc2 = colnames(gdsc2_drug),
+    ctrp1 = colnames(ctrp1_drug),
+    ctrp2 = colnames(ctrp2_drug),
+    prism = colnames(prism_drug),
+    gCSI = colnames(gCSI_drug)
+)
+```
+
+```{r}
+p_overlap_drug <- upset(fromList(drug_list), mainbar.y.label = "Drug counts", text.scale = 2,
+                        nsets = length(drug_list))
+p_overlap_drug
+```
+
+```{r}
+p_overlap_cell <- upset(fromList(cell_list), mainbar.y.label = "Cell Counts", text.scale = 2,
+                        nsets = length(drug_list))
+p_overlap_cell
+```
+
+# Format subtype name
+```{r}
+ccle_anno$Type <- toupper(ccle_anno$primary_disease)
+gdsc_anno$Type <- toupper(gdsc_anno$primary_disease)
+
+table(unique(gdsc_anno$Type) %in% unique(ccle_anno$Type))
+```
+
+```{r}
+# unique(gdsc_anno$Type)[!unique(gdsc_anno$Type) %in% unique(ccle_anno$Type)]
+```
+
+
+# Total statistics
+## Counts
+```{r}
+all_stat <- data.frame(
+  counts = c(dim(ctrp1_drug),
+             dim(ctrp2_drug),
+             dim(prism_drug),
+             dim(gdsc1_drug),
+             dim(gdsc2_drug),
+             dim(gCSI_drug)),
+  source = rep(c("CTRP1", "CTRP2", "PRISM",
+                 "GDSC1", "GDSC2", "gCSI"),
+               each = 2),
+  type = rep(c("Drugs", "Cells"), times = 6)
+)
+```
+
+```{r}
+p_count_drugandcell <- ggplot(all_stat, aes(x = source, 
+                     y = counts,
+                     fill = type)) + geom_col(position = "dodge") + geom_text(aes(label = counts), position = position_dodge(0.9), vjust = -0.8) + theme_bw() + theme(
+                       axis.title.x = element_blank()
+                     ) + coord_cartesian(ylim = c(0, 1500)) + ggtitle("Drugs and Cells Total Counts") + theme(legend.position = "top")
+# + scale_fill_manual(values = paletteer::paletteer_d("RColorBrewer::Set3")[3:4])
+p_count_drugandcell
+```
+
+## Cell type counts 
+```{r}
+table(ccle_anno$primary_disease)
+```
+
+```{r}
+table(gdsc_anno$primary_disease)
+```
+
+
+```{r}
+ctrp1_anno <- ccle_anno[ccle_anno$stripped_cell_line_name %in% colnames(ctrp1_drug),]
+tmp$ctrp1 <- ctrp1_anno %>% group_by(primary_disease) %>%
+  dplyr::summarise(count = n())
+tmp$ctrp1$source <- "CTRP1"
+  
+ctrp2_anno <- ccle_anno[ccle_anno$stripped_cell_line_name %in% colnames(ctrp2_drug),]
+tmp$ctrp2 <- ctrp2_anno %>% group_by(primary_disease) %>%
+  dplyr::summarise(count = n())
+tmp$ctrp2$source <- "CTRP2"
+
+prism_anno <- ccle_anno[ccle_anno$stripped_cell_line_name %in% colnames(prism_drug),]
+tmp$prism <- prism_anno %>% group_by(primary_disease) %>%
+  dplyr::summarise(count = n())
+tmp$prism$source <- "PRISM"
+
+gdsc1_anno <- gdsc_anno[gdsc_anno$Name2 %in% colnames(gdsc1_drug),]
+tmp$gdsc1 <- gdsc1_anno %>% group_by(primary_disease) %>%
+  dplyr::summarise(count = n())
+tmp$gdsc1$source <- "GDSC1"
+
+gdsc2_anno <- gdsc_anno[gdsc_anno$Name2 %in% colnames(gdsc2_drug),]
+tmp$gdsc2 <- gdsc2_anno %>% group_by(primary_disease) %>%
+  dplyr::summarise(count = n())
+tmp$gdsc2$source <- "GDSC2"
+
+gCSI_anno <- ccle_anno[ccle_anno$stripped_cell_line_name %in% colnames(gCSI_drug),]
+tmp$gCSI <- gCSI_anno %>% group_by(primary_disease) %>%
+  dplyr::summarise(count = n())
+tmp$gCSI$source <- "gCSI"
+```
+
+```{r}
+all_stat_subtype <- rbind(tmp$ctrp1,
+                          tmp$ctrp2,
+                          tmp$prism,
+                          tmp$gdsc1,
+                          tmp$gdsc2,
+                          tmp$gCSI)
+```
+
+```{r}
+# p_count_subtype <- ggplot(all_stat_subtype, aes(x = source, 
+#                      y = count,
+#                      fill = primary_disease)) + geom_col(position = position_dodge2(preserve = "single")) + geom_text(aes(label = count), position = position_dodge2(width = 0.9, preserve = "single"), vjust = -0.8) + theme_bw() + theme(
+#                        axis.title.x = element_blank()
+#                      )  + 
+#   scale_fill_manual(values = rev(paletteer::paletteer_d("ggsci::default_igv"))
+#                        ) + 
+#   coord_cartesian(ylim = c(0, 600))
+# p_count_subtype
+```
+
+```{r}
+all_stat_subtype2 <- all_stat_subtype %>% group_by(source) %>% mutate(percent = count/sum(count))
+```
+
+
+```{r}
+p_count_subtype <- ggplot(all_stat_subtype2, aes(x = source, 
+                     y = percent,
+                     fill = primary_disease)) +
+  geom_col(position = "stack") + theme_bw() + theme(
+                       axis.title.x = element_blank()
+                     )  + 
+  scale_fill_manual(values = rev(paletteer::paletteer_d("ggsci::default_igv"))
+                       ) + theme(
+                         legend.position = "top"
+                       ) + ggtitle("Subtype Cell Counts")
+p_count_subtype
+```
+
+# Cell Anno df
+```{r}
+ccle_anno2 <- ccle_anno[,c("stripped_cell_line_name",
+                           "Type",
+                           "Subtype",
+                           "DepMap_ID")]
+colnames(ccle_anno2) <- c("Name",
+                          "Type",
+                          "Subtype",
+                          "ID")
+
+gdsc_anno2 <- gdsc_anno[,c("Name2",
+                           "Type",
+                           "Subtype",
+                           "COSMIC_ID")]
+colnames(gdsc_anno2) <- c("Name",
+                          "Type",
+                          "Subtype",
+                          "ID")
+ccle_anno3 <- ccle_anno2[!ccle_anno2$Name %in% gdsc_anno2$Name,]
+cell_anno <- unique(rbind(ccle_anno3, gdsc_anno2))
+```
+
+
+```{r}
+# ctrp1_anno <- ccle_anno2[ccle_anno2$Name %in% colnames(ctrp1_drug),]
+# ctrp2_anno <- ccle_anno2[ccle_anno2$Name %in% colnames(ctrp2_drug),]
+# prism_anno <- ccle_anno2[ccle_anno2$Name %in% colnames(prism_drug),]
+# gCSI_anno <- ccle_anno2[ccle_anno2$Name %in% colnames(gCSI_drug),]
+# gdsc1_anno <- gdsc_anno2[gdsc_anno2$Name %in% colnames(gdsc1_drug),]
+# gdsc2_anno <- gdsc_anno2[gdsc_anno2$Name %in% colnames(gdsc2_drug),]
+```
+
+# Drug anno df
+```{r}
+colnames(gdsc_drug_anno) <- c("Name", "Synonyms", "Target Genes",
+                              "Target")
+colnames(ccle_drug_anno) <- c("Name", "Target", "Target Genes",
+                              "Phase")
+drug_anno <- merge(gdsc_drug_anno,
+                   ccle_drug_anno, by = c("Name", "Target",
+                                          "Target Genes"), all = T)
+```
+
+Remove duplicates:
+```{r}
+drug_anno2 <- drug_anno[!duplicated(drug_anno$Name),]
+```
+
+# Save
+```{r}
+save(p_count_subtype,
+     p_count_drugandcell,
+     p_overlap_cell,
+     p_overlap_drug,
+     file = "Output/04/stat_plot.Rda")
+```
+
+```{r}
+saveRDS(
+  drug_anno2,
+  file = "Output/04/drug_anno_raw.Rds"
+)
+
+drug_anno <- drug_anno2
+save(
+  cell_anno,
+  drug_anno,
+  file = "Output/04/anno.Rda"
+)
+```
+

@@ -1,0 +1,49 @@
+```{r library, include=FALSE}
+my_packages <- c("tidyverse", "data.table")
+pacman::p_load(char = my_packages)
+
+tmp <- list()
+```
+
+# Load data
+
+# Select mini test/development data 
+```{r}
+load(file = "Output/01/exp.Rda")
+load(file = "Output/01/cnv.Rda")
+load(file = "Output/01/meth.Rda")
+```
+
+Extract these three omics:
+```{r}
+vars <- ls()[!ls() %in% c("my_packages", "tmp", "vars", "i")]
+for(i in vars){
+  tmp$a <- base::get(i)
+  assign(i, tmp$a[1:100,])
+}
+```
+
+
+# Save
+```{r}
+# exp
+save(
+  ccle_exp,
+  gdsc_exp,
+  file = "Output/03/exp.Rda"
+)
+
+# cnv
+save(
+  ccle_cnv,
+  gdsc_cnv,
+  gCSI_cnv,
+  file = "Output/03/cnv.Rda"
+)
+
+# meth
+save(
+  ccle_meth,
+  file = "Output/03/meth.Rda"
+)
+```
