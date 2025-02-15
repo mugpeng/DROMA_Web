@@ -150,11 +150,11 @@ metaCalDisDis <- function(selected_pair) {
 # Plot ----
 # meta_df$p_adjust2 <- p.adjust(meta_df$p_value, method = "BH") 
 # meta_df$p_adjust <- p.adjust(meta_df$p_value, method = "bonferroni") 
-es_t = .4
-P_t = .001
-label = T
-top_label_each = 5
-title = NULL
+# es_t = .4
+# P_t = .001
+# label = T
+# top_label_each = 5
+# title = NULL
 
 # Plot volcano
 plotMetaVolcano <- function(meta_df, 
