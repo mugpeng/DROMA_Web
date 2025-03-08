@@ -14,7 +14,11 @@ tmp$omics_search_CNV <- data.frame(
 
 tmp$omics_search_mRNA <- data.frame(
   omics = c(rownames(ccle_exp),
-            rownames(gdsc_exp)),
+            rownames(gdsc_exp),
+            rownames(deng1_mRNA),
+            rownames(deng2_mRNA),
+            rownames(deng3_mRNA)
+  ),
   type = "mRNA"
 ) %>% unique()
 
@@ -74,7 +78,10 @@ drugs_search <- data.frame(
             rownames(prism_drug),
             rownames(gdsc1_drug),
             rownames(gdsc2_drug),
-            rownames(gCSI_drug)
+            rownames(gCSI_drug),
+            rownames(deng1_drug),
+            rownames(deng2_drug),
+            rownames(deng3_drug)
   ),
   type = "drug"
 ) %>% unique()
@@ -86,7 +93,10 @@ drugs_search2 <- data.frame(
             rownames(prism_drug),
             rownames(gdsc1_drug),
             rownames(gdsc2_drug),
-            rownames(gCSI_drug)
+            rownames(gCSI_drug),
+            rownames(deng1_drug),
+            rownames(deng2_drug),
+            rownames(deng3_drug)
   ),
   type = c(
     rep("CTRP1", nrow(ctrp1_drug)),
@@ -94,7 +104,10 @@ drugs_search2 <- data.frame(
     rep("Prism", nrow(prism_drug)),
     rep("GDSC1", nrow(gdsc1_drug)),
     rep("GDSC2", nrow(gdsc2_drug)),
-    rep("gCSI", nrow(gCSI_drug))
+    rep("gCSI", nrow(gCSI_drug)),
+    rep("DENG1", nrow(deng1_drug)),
+    rep("DENG2", nrow(deng2_drug)),
+    rep("DENG3", nrow(deng3_drug))
   )
 ) %>% unique()
 
@@ -164,9 +177,15 @@ tmp$cells_search_CNV <- data.frame(
 
 tmp$cells_search_mRNA <- data.frame(
   cells = c(colnames(ccle_mRNA),
-            colnames(gdsc_mRNA)),
+            colnames(gdsc_mRNA),
+            colnames(deng1_mRNA),
+            colnames(deng2_mRNA),
+            colnames(deng3_mRNA)),
   datasets = c(rep("ccle", ncol(ccle_mRNA)),
-               rep("gdsc", ncol(gdsc_mRNA))),
+               rep("gdsc", ncol(gdsc_mRNA)),
+               rep("deng1", ncol(deng1_mRNA)),
+               rep("deng2", ncol(deng2_mRNA)),
+               rep("deng3", ncol(deng3_mRNA))),
   type = "mRNA"
 ) %>% unique()
 
@@ -234,11 +253,15 @@ all_stat <- data.frame(
              dim(prism_drug),
              dim(gdsc1_drug),
              dim(gdsc2_drug),
-             dim(gCSI_drug)),
+             dim(gCSI_drug),
+             dim(deng1_drug),
+             dim(deng2_drug),
+             dim(deng3_drug)),
   source = rep(c("CTRP1", "CTRP2", "PRISM",
-                 "GDSC1", "GDSC2", "gCSI"),
+                 "GDSC1", "GDSC2", "gCSI",
+                 "DENG1", "DENG2", "DENG3"),
                each = 2),
-  type = rep(c("Drugs", "Cells"), times = 6)
+  type = rep(c("Drugs", "Cells"), times = 9)
 )
 p_count_drugandcell <- ggplot(all_stat, aes(x = source, 
                                             y = counts,
@@ -260,7 +283,10 @@ drug_list <- list(
   ctrp1 = rownames(ctrp1_drug),
   ctrp2 = rownames(ctrp2_drug),
   prism = rownames(prism_drug),
-  gCSI = rownames(gCSI_drug)
+  gCSI = rownames(gCSI_drug),
+  deng1 = rownames(deng1_drug),
+  deng2 = rownames(deng2_drug),
+  deng3 = rownames(deng3_drug)
 )
 cell_list <- list(
   gdsc1 = colnames(gdsc1_drug),
@@ -268,7 +294,10 @@ cell_list <- list(
   ctrp1 = colnames(ctrp1_drug),
   ctrp2 = colnames(ctrp2_drug),
   prism = colnames(prism_drug),
-  gCSI = colnames(gCSI_drug)
+  gCSI = colnames(gCSI_drug),
+  deng1 = colnames(deng1_drug),
+  deng2 = colnames(deng2_drug),
+  deng3 = colnames(deng3_drug)
 )
 p_overlap_cell <- upset(fromList(cell_list), mainbar.y.label = "Cell Counts", text.scale = 2,
                         nsets = length(drug_list))
