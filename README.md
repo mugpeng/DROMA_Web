@@ -1,8 +1,29 @@
-# DROMA-DB: Drug Response Omics Association Map
+# DROMA-DB: Drug Response Omics Association Map, Database
 
-DROMA-DB is a comprehensive database and analysis tool that integrates the largest published studies investigating cancer response to chemical compounds and the associations between drug sensitivity and multi-omics data (mRNA, CNV, protein, mutation, etc.) across various cancer models including PDC (Patient-Derived Cells), PDO (Patient-Derived Organoids), and PDX (Patient-Derived Xenografts).
+<div class="row">   
+    <div class="column" style="float:left;width:75%"> 
+     	   DROMA-DB is a comprehensive database and analysis tool that integrates the largest published studies investigating cancer response to chemical compounds and the associations between drug sensitivity and multi-omics data (mRNA, CNV, protein, mutation, etc.) across various cancer models including PDC (Patient-Derived Cells), PDO (Patient-Derived Organoids), and PDX, human data are under development.
+    </div>
+    <div class="column" style="float:left;width:25%">    
+        <img src="http://cos01.mugpeng.top/img/20250310150357.png">  
+    </div> 
+</div>
 
-![DROMA-DB Overview](images/image-20250121100802484.png)
+
+
+
+
+
+
+
+
+
+
+deng1-3 are our in house pdo data, others are all pcd data.
+
+<img src="http://cos01.mugpeng.top/img/20250310150259.png" style="zoom:50%;" />
+
+
 
 ## Citation
 
@@ -26,7 +47,35 @@ DROMA-DB offers a range of powerful features for cancer pharmacogenomics researc
 
 6. **Data Export**: Download results in various formats (PDF, CSV, R objects) for further analysis.
 
-## Installation
+
+
+## Statistics Information
+
+This section provides overview statistics about the database:
+
+- Drug and sample counts by source
+- Data type counts (cell lines vs PDO)
+- Molecular characteristics available in each dataset
+- Drug and sample overlap between datasets
+- Tumor type distribution
+- Drug mechanism of action visualization
+
+![](http://cos01.mugpeng.top/img/20250310150835.png)
+
+A. Drug and sample distribution within the dataset. A total of 2,065 drugs and 1,815 samples are represented in the dataset, with cell lines (2,065 drugs) being more extensively tested than patient-derived organoids (PDO, 78 drugs tested). For type of resource, PRISM shows the highest number of drugs, while GDSC2 contains the most cell lines.
+B. Molecular characterization coverage across dataset types. Multiple omics data types, such as whole-exome sequencing, RNA-Seq, and proteomics, are available for different systems, with variation observed across DEG and PDO datasets. Gene fusion data are limited to specific subsets.
+C. Mechanisms of action (MOA) for drugs tested in the dataset. The dataset comprises diverse drug classes, encompassing EGFR inhibitors (69 drugs), VEGFR inhibitors (70 drugs), PI3K inhibitors (51 drugs), and CDK inhibitors (24 drugs), among others. Targeted therapies dominate the collection.
+D. Tumor type distribution across organ systems. Tumor systems represented include lung (1373), blood/lymphatic (1028 samples), gastrointestinal (669 samples), breast (513 samples), and other tumors. The sizes of the bubbles correlate with the number of samples per tumor system.
+
+
+
+## Use DROMA-DB shiny
+
+Web application can only be accessed in UM campus: http://fscpo.fhs.um.edu.mo:8888/DROMA_DB/
+
+
+
+## Local deployment
 
 ### Prerequisites
 
@@ -94,18 +143,13 @@ This module helps you conduct significant tests between a targeted feature (a dr
 - View results as a volcano plot
 - Download results for further analysis
 
-![Batch Features Analysis](http://cos01.mugpeng.top/img/20250121105624.png)
+![](http://cos01.mugpeng.top/img/20250310150740.png)
 
-### 3. Statistics Information
+A. Volcano plot showing associations between Bortezomib and mRNA expression. The x-axis represents effect size (strength and direction of association), while the y-axis shows statistical significance (-log10 p-value). Red points indicate significant positive associations (effect size > 0.2, p < 0.001), suggesting resistance markers; blue points show significant negative associations, suggesting sensitivity markers. The effect size is calculated from meta analysis which each feature pairs use different statistic method depends on data type: 1) For continuous vs. continuous features (e.g., drug vs. mRNA): Pearson correlation; 2) For discrete vs. continuous features (e.g., mutation vs. drug), Wilcoxon test; 3) For discrete vs. discrete features (e.g., mutation vs. fusion): Chi-squared test. PSMB5 may server as a potential Bortezomib resistance gene from screen.
+B. All results are downloadable in various formats (PDF, CSV, R objects) for further analysis.
+C. A popup window can remind user the completion of analysis.
 
-This section provides overview statistics about the database:
 
-- Drug and sample counts by source
-- Data type counts (cell lines vs PDO)
-- Molecular characteristics available in each dataset
-- Drug and sample overlap between datasets
-- Tumor type distribution
-- Drug mechanism of action visualization
 
 ## Project Structure
 
@@ -123,6 +167,8 @@ This section provides overview statistics about the database:
 - **Input/**: Contains data files
 - **config.yml**: Configuration settings
 
+
+
 ## Data Sources
 
 DROMA-DB integrates data from multiple sources:
@@ -131,6 +177,8 @@ DROMA-DB integrates data from multiple sources:
 - **Patient-Derived Organoid (PDO) Data**: In-house and published datasets
 - **Annotation Data**: Comprehensive annotations for samples and drugs
 
+
+
 ## Contact
 
 Feel free to contact us if you find any bugs or have any suggestions:
@@ -138,6 +186,28 @@ Feel free to contact us if you find any bugs or have any suggestions:
 - Email: mugpeng@foxmail.com, mugpeng@outlook.com, yc47680@um.edu.mo
 - GitHub: https://github.com/mugpeng
 
+
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+
+
+# TODO
+
+## Major
+
+- [x] Add PDO drug and rna
+- [ ] Reonline
+- [ ] Add PDO WES
+- [ ] change to z-score 
+- [ ] add chemical structure info
+
+
+
+## Minor
+
+- [ ] Add compare methods
+- [ ] Add drug annotation for drug screen in batch mode
+- [ ] 
