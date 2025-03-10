@@ -10,6 +10,7 @@ pairDrugOmic <- function(myOmics, myDrugs){
       intersected_cells <- intersect(names(omic_sel), names(drug_sel))
       omic_sel <- omic_sel[match(intersected_cells, names(omic_sel))]
       drug_sel <- drug_sel[match(intersected_cells, names(drug_sel))]
+      if(length(na.omit(omic_sel)) == 0 | length(na.omit(drug_sel)) == 0){ return(NULL) }
       list("omic" = omic_sel,
            "drug" = drug_sel)
     })

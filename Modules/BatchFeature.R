@@ -57,6 +57,50 @@ uiBatchFeature <- function(id){
                                      "Drug Sensitivity" = "drug"
                          ), selected = "drug"
              )),
+    ),
+    # Add data_type and tumor_type filters
+    fluidRow(
+      column(6,
+             selectInput(inputId = ns("data_type"), 
+                         "Filter by data type:", 
+                         choices = c("All" = "all",
+                                     "Cell Lines" = "cell",
+                                     "Patient-Derived Organoids" = "PDO"
+                         ), selected = "all"
+             )),
+      column(6,
+             selectInput(inputId = ns("tumor_type"), 
+                         "Filter by tumor type:", 
+                         choices = c("All" = "all",
+                                     "Aerodigestive Tract Cancer" = "aerodigestive tract cancer",
+                                     "Bladder Cancer" = "bladder cancer",
+                                     "Breast Cancer" = "breast cancer",
+                                     "Cervical Cancer" = "cervical cancer",
+                                     "Choriocarcinoma" = "choriocarcinoma",
+                                     "Endometrial Cancer" = "endometrial cancer",
+                                     "Gastrointestinal Cancer" = "gastrointestinal cancer",
+                                     "Haematopoietic/Lymphoid Cancer" = "haematopoietic/lymphoid cancer",
+                                     "Kidney Cancer" = "kidney cancer",
+                                     "Liver Cancer" = "liver cancer",
+                                     "Lung Cancer" = "lung cancer",
+                                     "Nasopharyngeal Cancer" = "nasopharyngeal cancer",
+                                     "Nervous System Cancer" = "nervous system cancer",
+                                     "Non-Cancer" = "non-cancer",
+                                     "Ovarian Cancer" = "ovarian cancer",
+                                     "Pancreatic Cancer" = "pancreatic cancer",
+                                     "Prostate Cancer" = "prostate cancer",
+                                     "Retinoblastoma" = "retinoblastoma",
+                                     "Sarcoma" = "sarcoma",
+                                     "Skin Cancer" = "skin cancer",
+                                     "Stomach Cancer" = "stomach cancer",
+                                     "Testicular Cancer" = "testicular cancer",
+                                     "Thyroid Cancer" = "thyroid cancer",
+                                     "Uterine Cancer" = "uterine cancer",
+                                     "Vulvar Cancer" = "vulvar cancer"
+                         ), selected = "all"
+             ))
+    ),
+    fluidRow(
       column(12,
              hidden(
                div(id = ns("progressBox"),
@@ -178,6 +222,8 @@ serverBatchFeature <- function(input, output, session){
       feature1_type = input$select_features1,
       feature1_name = input$select_specific_feature,
       feature2_type = input$select_features2,
+      data_type = input$data_type,
+      tumor_type = input$tumor_type,
       cores = used_core
       # progress_callback = progress_callback 
     )

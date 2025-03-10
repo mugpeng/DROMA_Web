@@ -16,11 +16,16 @@ load("Input/01/fusion.Rda")
 load("Input/01/mut.Rda")
 
 # Drug and annotation data ----
-load("Input/02/drug2.Rda")
-load("Input/04/anno.Rda")
+# load("Input/02/drug2.Rda")
+# load("Input/05/pdo_anno.Rda") 
+
+# modified new anno and drug 
+load("Input/02/drug_0309.Rda")
+# load("Input/05/pdo_anno_new.Rda") 
+load("Input/06/anno_0309.Rda") 
 
 # PDO data ----
-load("Input/05/pdo_deng.Rda")
+load("Input/05/pdo_deng_0309.Rda")
 
 # Finished Plot or preplot obj ----
 

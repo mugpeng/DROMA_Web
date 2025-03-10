@@ -1,214 +1,221 @@
-# DROMA
- Drug Response Omics Association Map.
+# DROMA-DB: Drug Response Omics Association Map, Database
+
+<div class="row">   
+    <div class="column" style="float:left;width:75%"> 
+     	   DROMA-DB is a comprehensive database and analysis tool that integrates the largest published studies investigating cancer response to chemical compounds and the associations between drug sensitivity and multi-omics data (mRNA, CNV, protein, mutation, etc.) across various cancer models including PDC (Patient-Derived Cells), PDO (Patient-Derived Organoids), and PDX, human data are under development.
+    </div>
+    <div class="column" style="float:left;width:25%">    
+        <img src="http://cos01.mugpeng.top/img/20250310150357.png">  
+    </div> 
+</div>
 
 
 
-DROMA-DB: A database that includes the largest published studies(PDC, PDO, PDX) investigating the cancer to chemical compound treatment, and the association between drug sensitivity and multi-omics(mRNA, CNV, protein, mutation, etc.).
-
-![image-20250121100802484](images/image-20250121100802484.png)
 
 
 
-Please cite when you used in your study:
+
+
+
+
+
+deng1-3 are our in house pdo data, others are all pcd data.
+
+<img src="http://cos01.mugpeng.top/img/20250310150259.png" style="zoom:50%;" />
+
+
+
+## Citation
+
+If you use DROMA-DB in your research, please cite:
 
 Li, S., Peng, Y., Chen, M. et al. Facilitating integrative and personalized oncology omics analysis with UCSCXenaShiny. Commun Biol 7, 1200 (2024). https://doi.org/10.1038/s42003-024-06891-2
 
+## Features
 
+DROMA-DB offers a range of powerful features for cancer pharmacogenomics research:
 
-# GOALS
+1. **Comprehensive Data Integration**: Includes high-throughput cancer type PDO, PDC, PDX data associated between drug sensitivity and multi-omics, as well as in-house data.
 
-A database (DROMA-DB)
-1) includes high-throughput cancer type PDO, PDC, PDX data associated between drug sensitivity and multi-omics, also Denglab in house data; 
-2) Other useful gene-drug correlation information from FDA and papers.
-3) Provide powerful tools for finding potential drug targets, repurposing drugs for target genes. 
-4) Friendly methods to predict the patients treatment by providing omics data.
-5) Supply both code package and web interface for people to use.
+2. **Drug-Omics Pairs Analysis**: Explore associations between specific drug responses and omics features with statistical rigor.
 
+3. **Batch Features Associations Analysis**: Conduct large-scale analysis of associations between a target feature and all features in a dataset.
 
+4. **Filtering Capabilities**: Filter analyses by data type (cell lines or PDO) and tumor type for more targeted research.
 
-An AI (DROMA-AI)
+5. **Statistical Visualization**: View meta-analysis forest plots, volcano plots, and other visualizations to understand relationships.
 
-1) Talk to her all your interests about genes or drugs like an omniscient friend/tool based on DROMA-DB and other training data.
-2) Ask her to use any functions from DROMA-DB.
-
-
-
-# TODO
-
-
-
-
-
-# Tutorial
-
-![](http://cos01.mugpeng.top/img/20250121100754.png)
-
-The website consisted of three main sections (pages): 1) Drugs-omics Pairs Analysis; 2) Batch Features Associations Analysis; and 3) Statistics Information, which is the final page. The tour will start from this last page.
-
-
-
-Following the principle of least change, AAC values from gCSI are rescaled such that a lower metric indicates higher sensitivity across all datasets. (AAC2 = max(AAC) - AAC)
-
-![image-20240116150920858](http://cos01.mugpeng.top/img/image-20240116150920858.png)
-
-Lower scores on metric scales mean stronger drug sensitivity.
+6. **Data Export**: Download results in various formats (PDF, CSV, R objects) for further analysis.
 
 
 
 ## Statistics Information
 
-The omics data we collected including mRNA expression, protein data, copy number variant(CNV), gene fusion, methylation, mutation(gene mutation, and a specific amino acid change).
+This section provides overview statistics about the database:
 
+- Drug and sample counts by source
+- Data type counts (cell lines vs PDO)
+- Molecular characteristics available in each dataset
+- Drug and sample overlap between datasets
+- Tumor type distribution
+- Drug mechanism of action visualization
 
+![](http://cos01.mugpeng.top/img/20250310150835.png)
 
-In vitro cell line pharmacogenetics studies can be categorized into CCLE, GDSC, and other projects (produced by different insititutions). CCLE, GDSC projects produce the genomics data, then other experiments are conducted to generate drug data used the same cell lines one of the projects.
+A. Drug and sample distribution within the dataset. A total of 2,065 drugs and 1,815 samples are represented in the dataset, with cell lines (2,065 drugs) being more extensively tested than patient-derived organoids (PDO, 78 drugs tested). For type of resource, PRISM shows the highest number of drugs, while GDSC2 contains the most cell lines.
+B. Molecular characterization coverage across dataset types. Multiple omics data types, such as whole-exome sequencing, RNA-Seq, and proteomics, are available for different systems, with variation observed across DEG and PDO datasets. Gene fusion data are limited to specific subsets.
+C. Mechanisms of action (MOA) for drugs tested in the dataset. The dataset comprises diverse drug classes, encompassing EGFR inhibitors (69 drugs), VEGFR inhibitors (70 drugs), PI3K inhibitors (51 drugs), and CDK inhibitors (24 drugs), among others. Targeted therapies dominate the collection.
+D. Tumor type distribution across organ systems. Tumor systems represented include lung (1373), blood/lymphatic (1028 samples), gastrointestinal (669 samples), breast (513 samples), and other tumors. The sizes of the bubbles correlate with the number of samples per tumor system.
 
-The cell lines from the Cancer Cell Line Encyclopedia (CCLE) were used to generate several drug sensitivity projects, including CTRP1, CTRP2, and PRISM. Meanwhile, the Genomics of Drug Sensitivity in Cancer (GDSC) project generated GDSC1 and GDSC2. And Genentech Cell Screening Initiative (gCSI) project has its own omics and drug response data.
 
 
+## Use DROMA-DB shiny
 
-The PRISM project tests the highest number of drugs, while GDSC1 focuses on testing the largest number of cells.
+Web application can only be accessed in UM campus: http://fscpo.fhs.um.edu.mo:8888/DROMA_DB/
 
-![image-20240116134858293](http://cos01.mugpeng.top/img/image-20240116134858293.png)
 
-Projects have tested same drugs and same cells. When multiple projects test the same drugs and cells, there is typically a higher degree of overlap between projects that use the same cell lines.
 
-![image-20240116140858989](http://cos01.mugpeng.top/img/image-20240116140858989.png)
+## Local deployment
 
-![image-20240116140840856](http://cos01.mugpeng.top/img/image-20240116140840856.png)
+### Prerequisites
 
-The cell lines are mainly from lung cancer, colorectal cancer, and ovarian cancer:
+- R (>= 4.0.0)
+- RStudio (recommended for ease of use)
 
-![image-20240116141100546](http://cos01.mugpeng.top/img/image-20240116141100546.png)
+### Required R Packages
 
-Also there is annotation for cell and drug:
+```r
+# Core packages
+install.packages(c("shiny", "shinyWidgets", "shinyjs", "waiter", "DT", "config"))
 
-![image-20240116143433413](http://cos01.mugpeng.top/img/image-20240116143433413.png)
+# Data manipulation
+install.packages(c("dplyr", "data.table"))
 
-![image-20240116143440528](http://cos01.mugpeng.top/img/image-20240116143440528.png)
+# Meta analysis
+install.packages(c("meta", "metafor", "effsize"))
 
+# Visualization
+install.packages(c("UpSetR", "ggpubr", "plotly", "patchwork"))
 
+# Parallel processing
+install.packages(c("snowfall", "parallel"))
+```
 
-You can search drugs of interests.
+### Setup
 
-![image-20240116143707243](http://cos01.mugpeng.top/img/image-20240116143707243.png)
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/DROMA-DB.git
+   ```
 
+2. Open the project in RStudio by clicking on the `Project.Rproj` file.
 
+3. Run the application:
+   ```r
+   source("App.R")
+   ```
 
-## Main Function
+## Usage
 
-### 1) Drugs-omics pairs analysis
+DROMA-DB consists of three main sections:
 
-This feature allowed user to explore the association between a selected drug resistance event and a certain omic. For continuous omics data like mRNA, methylation, copy number variant, protein, spearman correlation was calculated. While for discrete omics data such as mutation genes, mutation gene points or gene fusions, wilcoxon test is chosen for testing Signification.
+### 1. Drugs-Omics Pairs Analysis
 
-![](http://cos01.mugpeng.top/img/20250121101140.png)
+This module allows you to explore the association between a selected drug resistance event and a specific omic feature:
 
+- Select a molecular type (mRNA, CNV, mutation, etc.)
+- Choose a specific molecular feature
+- Select a drug of interest
+- Filter by data type (cell lines or PDO) and tumor type
+- View statistical results and visualizations
 
+For continuous omics data (mRNA, methylation, CNV, protein), Spearman correlation is calculated. For discrete omics data (mutations, fusions), Wilcoxon tests are used.
 
-The title of each plot indicates the source of the omics and drug response data. For example, a plot titled `gdsc_ctrp1` would mean the omics data is from the GDSC project, while the drug sensitivity data is from the CTRP1 project, as mentioned in the initial *Statistics Information* section. Personally, I think comparing cells data from different organizations (e.g. GDSC vs CCLE) is reasonable for analyzing correlations, as we are primarily interested in examining the relationship between omic features and drug responses, regardless of the original data source. Combining data from multiple sources can provide a more comprehensive view of these relationships.
+![Drugs-Omics Pairs Analysis](http://cos01.mugpeng.top/img/20250121101140.png)
 
-The upper figure shows that the gene expression of ABCC3 is significantly positively correlated with sensitivity to the drug YM-155 across all ten dataset combinations. This correlation could potentially be explained by the known function of the ABCC3 gene. Specifically, ABCC3 encodes an ATP-binding cassette transporter protein that is involved in exporting various molecules, including drugs, out of cells via active transport across cell membranes. Given its role in drug efflux, higher ABCC3 expression may correlate with increased efflux and reduced intracellular concentration of YM-155, resulting in greater resistance to the drug's effects. This might explain the observed positive correlation between ABCC3 expression levels and higher values for YM-155.
+### 2. Batch Features Associations Analysis
 
+This module helps you conduct significant tests between a targeted feature (a drug or an omic) and all features in a particular dataset:
 
+- Select a feature type and specific feature
+- Choose a second feature type to compare against
+- Filter by data type and tumor type
+- View results as a volcano plot
+- Download results for further analysis
 
-Another example is gene mutation of TP53 and drug AMG-232, it is obvious that the wild type TP53 has significant higher sensitivity:
+![](http://cos01.mugpeng.top/img/20250310150740.png)
 
-![](http://cos01.mugpeng.top/img/20250121102231.png)
+A. Volcano plot showing associations between Bortezomib and mRNA expression. The x-axis represents effect size (strength and direction of association), while the y-axis shows statistical significance (-log10 p-value). Red points indicate significant positive associations (effect size > 0.2, p < 0.001), suggesting resistance markers; blue points show significant negative associations, suggesting sensitivity markers. The effect size is calculated from meta analysis which each feature pairs use different statistic method depends on data type: 1) For continuous vs. continuous features (e.g., drug vs. mRNA): Pearson correlation; 2) For discrete vs. continuous features (e.g., mutation vs. drug), Wilcoxon test; 3) For discrete vs. discrete features (e.g., mutation vs. fusion): Chi-squared test. PSMB5 may server as a potential Bortezomib resistance gene from screen.
+B. All results are downloadable in various formats (PDF, CSV, R objects) for further analysis.
+C. A popup window can remind user the completion of analysis.
 
-AMG-232 is an inhibitor of the p53-MDM2 interaction. Mutated tp53 may deactivate the suppressor program induced by AMG-232 through disruption of this interaction: [p53-family proteins and their regulators: hubs and spokes in tumor suppression | Cell Death & Differentiation (nature.com)](https://www.nature.com/articles/cdd201035)
 
 
+## Project Structure
 
-This function displays a meta-analysis forest plot and a download option. The plot summarizes the results of multiple studies, with each row representing an individual study's effect size and confidence interval. The diamond at the bottom represents the overall pooled effect size (0.27, 95% CI: 0.23-0.30) across all studies. The highly significant p-value (p = 6.81e-53) confirms a strong overall effect. Because the confidence interval does not include zero, the effect is statistically significant. The plot also outputs an overall effect size (similar to an R coefficient) and a p-value. 
+- **App.R**: Main application file
+- **Modules/**: Contains UI and server components for different application sections
+  - **DrugOmicPair.R**: Drug-omics pairs analysis module
+  - **BatchFeature.R**: Batch features analysis module
+  - **StatAnno.R**: Statistics and annotations module
+  - **LoadData.R**: Data loading module
+  - **Preprocess.R**: Data preprocessing module
+- **Package_Function/**: Contains core functionality
+  - **FuncGetData.R**: Data retrieval functions
+  - **FuncDrugOmicPair.R**: Drug-omics pair analysis functions
+  - **FuncBatchFeature.R**: Batch feature analysis functions
+- **Input/**: Contains data files
+- **config.yml**: Configuration settings
 
-The direction of the overall effect is consistent with the individual study effect sizes (e.g., R coefficients in the mRNA example). A positive effect size indicates that higher gene expression is associated with drug resistance across studies, suggesting a potential drug resistance gene. Conversely, a negative effect size would indicate that lower gene expression (or wild type) is associated with reduced drug sensitivity, suggesting that the presence of the gene may enhance drug efficacy:
 
-![](http://cos01.mugpeng.top/img/20250121101738.png)
 
-You can save both the each test plot and summarized forest plot, or save the data used to plot to draw a new one by yourself.
+## Data Sources
 
+DROMA-DB integrates data from multiple sources:
 
+- **Cell Line Data**: CCLE, GDSC, gCSI, CTRP1, CTRP2, PRISM
+- **Patient-Derived Organoid (PDO) Data**: In-house and published datasets
+- **Annotation Data**: Comprehensive annotations for samples and drugs
 
-### 2) Batch Features Associations Analysis
 
-This analysis module helped people to conduct a significant test between a targeted feature(a drug or an omic) and all the features in a particular feature dataset grouped by their collected databases in a large scale.
 
-The statistic test is calculated depend on the data types:
+## Contact
 
-- For continuous features compared to continuous datasets (e.g. drug A levels versus all CNV features), the Pearson correlation test is used.
-- For discrete features compared to discrete databases (e.g. TP53 mutation events versus all collected gene fusions), will use Wilcoxon test.
-- For discrete features compared to discrete databases, Chi-squared test is the choice.
+Feel free to contact us if you find any bugs or have any suggestions:
 
-All the calculated results will be summarize by meta function with `metagen` in R package "meta". And produce a volcano plot:
+- Email: mugpeng@foxmail.com, mugpeng@outlook.com, yc47680@um.edu.mo
+- GitHub: https://github.com/mugpeng
 
-![](http://cos01.mugpeng.top/img/20250121105624.png)
 
-[Proteasome inhibitors block Ikaros degradation by lenalidomide in multiple myeloma - PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC5004433/)
 
-![](http://cos01.mugpeng.top/img/20250121113016.png)
+## License
 
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 
-A feature-database pair will be considered statistically significant if both of the following criteria are met:
 
-1. The absolute value of the effect size is greater than 0.2. 
-2. The p-value is less than 0.001.
-3. Top 5 in up and down will be marked.
+## Milestone
 
+### 0319
 
+I will attend UM PhD seminar, welcome!
 
 
 
+# TODO
 
+## Major
 
-We will find the potential related mRNA with Lapatinib as an example:
+- [x] Add PDO drug and rna
+- [ ] Reonline
+- [ ] Add PDO WES
+- [ ] change to z-score 
+- [ ] add chemical structure info
 
-![image-20240116172531752](http://cos01.mugpeng.top/img/image-20240116172531752.png)
 
 
+## Minor
 
-Frequency table has two columns, frequency col counts the number of pairs labeled as significant in all databases containing this pair. Proportion col is the fraction of significant pair in all pairs. You can choose the topmost to further examination with result table.
-
-![image-20240117161051412](http://cos01.mugpeng.top/img/image-20240117161051412.png)
-
-For example, we are interested about CDH1 gene, which is a classical cadherin of the cadherin superfamily, Mutations in this gene are correlated with gastric, breast, colorectal, thyroid and ovarian cancer. Loss of function of this gene is thought to contribute to cancer progression by increasing proliferation, invasion, and/or metastasis, described from genecode: [CDH1 Gene - GeneCards | CADH1 Protein | CADH1 Antibody](https://www.genecards.org/cgi-bin/carddisp.pl?gene=CDH1&keywords=CDH1)
-
-We can search this gene by the search box at the top right edge. The results indicate that higher expression of CDH1 is correlated with increased sensitivity to LAPATINIB. As drug resistance metrics are negatively correlated with drug sensitivity, a higher CDH1 expression level tends to predict greater LAPATINIB sensitivity.
-
-![image-20240117161119979](http://cos01.mugpeng.top/img/image-20240117161119979.png)
-
-A downloadable button is also provided, allowing users to access a CSV file containing the data. This CSV file can then be used for additional analyses or data processing as needed.
-
-![image-20240117161344003](http://cos01.mugpeng.top/img/image-20240117161344003.png)
-
-
-
-A simple online search reveals that CDH1 is related to ERBB2, and ERBB2 is a validated target of LAPATINIB. This suggests that CDH1 expression levels may help determine a tumor's response to LAPATINIB treatment, potentially through its relationship to the drug's primary target, ERBB2. 
-
-![image-20240117160239539](http://cos01.mugpeng.top/img/image-20240117160239539.png)
-
-
-
-By the way, we can also double check it through *Drugs-omics pairs analysis* module:
-
-![image-20240117160637855](http://cos01.mugpeng.top/img/image-20240117160637855.png)
-
-
-
-Besides, I also design some useful widgets.
-
-A bar to indicate the progress:
-
-![](http://cos01.mugpeng.top/img/20250121104517.png)
-
-A jump box tell the analysis has finished:
-
-![](http://cos01.mugpeng.top/img/20250121104503.png)
-
-
-
-# Contact with me
-
-Feel free to talk with me if you find any bugs or have any suggestions. :)
-
-Email: mugpeng@foxmail.com, mugpeng@outlook.com, yc47680@um.edu.mo
+- [ ] Add compare methods
+- [ ] Add drug annotation for drug screen in batch mode
+- [ ] 
