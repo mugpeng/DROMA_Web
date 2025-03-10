@@ -194,6 +194,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 
 
+## Milestone
+
+### 0319
+
+I will attend UM PhD seminar, welcome!
+
+
+
 # TODO
 
 ## Major
