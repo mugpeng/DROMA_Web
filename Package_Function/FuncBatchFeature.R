@@ -1,4 +1,3 @@
-
 # meta calculation ----
 metaCalConCon <- function(selected_pair){
   if(length(selected_pair) < 2) return(NULL)
@@ -231,6 +230,8 @@ format_time <- function(seconds) {
 BatchFindSigFeaturesPlus <- function(feature1_type, 
                                      feature1_name, 
                                      feature2_type,
+                                     data_type = "all",
+                                     tumor_type = "all",
                                      cores = 1
 ) {  # Add cores parameter
   if(!all(c(feature1_type, feature2_type) %in% c("mRNA","cnv",
@@ -242,6 +243,11 @@ BatchFindSigFeaturesPlus <- function(feature1_type,
     stop("The select feature type doesn't exist. Please choose from drug, mRNA, meth, cnv, proteinms, proteinrppa, \nmutation_gene, mutation_site, or fusion.")
   }
   
+  # Validate data_type parameter
+  if(!data_type %in% c("all", "cell", "PDO")) {
+    stop("Invalid data_type. Please choose from 'all', 'cell', or 'PDO'.")
+  }
+  
   # Determine feature types
   continuous_types <- c("drug", "cnv", "proteinrppa", 
                         "proteinms", "meth", "mRNA")
@@ -249,7 +255,7 @@ BatchFindSigFeaturesPlus <- function(feature1_type,
   is_continuous2 <- feature2_type %in% continuous_types
   
   # Get selected specific feature1 data
-  selected_feas1 <- selFeatures(feature1_type, feature1_name) 
+  selected_feas1 <- selFeatures(feature1_type, feature1_name, data_type, tumor_type) 
   
   # Get compared feature2 vector
   feas_search_sel <- feas_search[feas_search$type %in% feature2_type,]
@@ -259,7 +265,7 @@ BatchFindSigFeaturesPlus <- function(feature1_type,
   worker_function <- function(x) {
     results <- tryCatch({
       feature2_name <- feas_search_sel[x,1]
-      selected_feas2 <- selFeatures(feature2_type, feature2_name) 
+      selected_feas2 <- selFeatures(feature2_type, feature2_name, data_type, tumor_type) 
       
       if (is.null(selected_feas2)) return(NULL)
       

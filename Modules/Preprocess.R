@@ -261,22 +261,70 @@ all_stat <- data.frame(
                  "GDSC1", "GDSC2", "gCSI",
                  "DENG1", "DENG2", "DENG3"),
                each = 2),
-  type = rep(c("Drugs", "Cells"), times = 9)
+  type = rep(c("Drugs", "Samples"), times = 9)
 )
-p_count_drugandcell <- ggplot(all_stat, aes(x = source, 
+all_stat$source <- factor(all_stat$source, levels = rev(c("CTRP1", "CTRP2", "PRISM",
+                                                          "GDSC1", "GDSC2", "gCSI",
+                                                          "DENG3", "DENG2", "DENG1")))
+p_count_drugandsample <- ggplot(all_stat, aes(x = source, 
                                             y = counts,
                                             fill = type)) + geom_col(position = "dodge") + 
-  geom_text(aes(label = counts), position = position_dodge(0.9), vjust = -0.8) + theme_bw() + 
+  geom_text(aes(label = counts), size = 5,
+            position = position_dodge(0.9), 
+            vjust = -0.8) + theme_bw() + 
   theme(
                                               axis.title.x = element_blank(),
-                                              axis.text = element_text(size = 13, color = "black"),
-                                              axis.title = element_text(size = 13, color = "black"),
-                                              legend.title = element_text(size = 13, colour = "black"),
-                                              legend.text = element_text(size = 13)
-                                            ) + coord_cartesian(ylim = c(0, 1500)) + 
-  ggtitle("Drugs and Cells Total Counts") + theme(legend.position = "top")
+                                              title = element_text(size = 17, color = "black"),
+                                              axis.title.y = element_text(size = 17, color = "black"),
+                                              axis.text = element_text(size = 17, color = "black"),
+                                              axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+                                              axis.title = element_text(size = 17, color = "black"),
+                                              legend.title = element_text(size = 17, colour = "black"),
+                                              legend.text = element_text(size = 17),
+                                              legend.position = "top"
+                                            ) + coord_cartesian(ylim = c(0, 1550))
 
-# overlap cell and drug
+# Plot counts by data type (PDO vs cell lines) ----
+sample_counts_by_type <- table(sample_anno$DataType)
+
+# Create a data frame for plotting
+datasource_stat <- data.frame(
+  counts = c(
+    length(unique(drug_anno[drug_anno$type_source %in% "PDO",]$`Harmonized Name`)),
+    length(unique(sample_anno[sample_anno$DataType %in% "PDO",]$SampleID)),
+    length(unique(drug_anno[drug_anno$type_source %in% "cell",]$`Harmonized Name`)),
+    length(unique(sample_anno[sample_anno$DataType %in% "cell",]$SampleID))
+  ),
+  source = rep(c("PDO", "Cell"), each = 2),
+  type = rep(c("Drugs", "Samples"), times = 2)
+)
+
+# Create the plot
+p_count_datasource <- ggplot(datasource_stat, aes(x = source, 
+                                                  y = counts,
+                                                  fill = type)) + 
+  geom_col(position = "dodge") + 
+  geom_text(aes(label = counts), size = 5,
+            position = position_dodge(0.9), 
+            vjust = -0.8) + 
+  theme_bw() + 
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+    title = element_text(size = 17, color = "black"),
+    axis.title.y = element_text(size = 17, color = "black"),
+    axis.text = element_text(size = 17, color = "black"),
+    legend.position = "none"
+  ) + 
+  ylab("Count") + 
+  ggtitle("") + coord_cartesian(ylim = c(0, 2300))
+
+p_count_combined <- patchwork::wrap_plots(p_count_datasource, 
+                                          p_count_drugandsample + theme(axis.title.y = element_blank()), 
+                                          widths = c(4,10)) + 
+  plot_layout(guides = 'keep')
+
+# overlap cell and drug ----
 drug_list <- list(
   gdsc1 = rownames(gdsc1_drug),
   gdsc2 = rownames(gdsc2_drug),
@@ -288,7 +336,7 @@ drug_list <- list(
   deng2 = rownames(deng2_drug),
   deng3 = rownames(deng3_drug)
 )
-cell_list <- list(
+sample_list <- list(
   gdsc1 = colnames(gdsc1_drug),
   gdsc2 = colnames(gdsc2_drug),
   ctrp1 = colnames(ctrp1_drug),
@@ -299,7 +347,7 @@ cell_list <- list(
   deng2 = colnames(deng2_drug),
   deng3 = colnames(deng3_drug)
 )
-p_overlap_cell <- upset(fromList(cell_list), mainbar.y.label = "Cell Counts", text.scale = 2,
+p_overlap_sample <- upset(fromList(sample_list), mainbar.y.label = "Sample Counts", text.scale = 2,
                         nsets = length(drug_list))
 p_overlap_drug <- upset(fromList(drug_list), mainbar.y.label = "Drug counts", text.scale = 2,
                         nsets = length(drug_list))
@@ -346,7 +394,9 @@ tmp$name_mapping <- c(
 tmp$matrix_data$Feature2 <- unname(tmp$name_mapping[match(tmp$matrix_data$Feature, names(tmp$name_mapping))])
 tmp$matrix_data$Feature2 <- factor(tmp$matrix_data$Feature2, 
                                    levels = unique(tmp$name_mapping[tmp$feature_order]))
-
+tmp$matrix_data$Database <- factor(tmp$matrix_data$Database,
+                                   levels = rev(c( "ccle", "gdsc", "gCSI", 
+                                                  "deng3", "deng2", "deng1")))
 # Create the plot
 p_mol_character <- ggplot(tmp$matrix_data, aes(x = Feature2, y = Database)) +
   geom_point(aes(size = Present, color = Present)) +
@@ -355,7 +405,7 @@ p_mol_character <- ggplot(tmp$matrix_data, aes(x = Feature2, y = Database)) +
   theme_bw() + 
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1),
-    axis.text = element_text(size = 13, color = "black"),
+    axis.text = element_text(size = 17, color = "black"),
     panel.grid.major = element_line(color = "grey90"),
     panel.grid.minor = element_blank(),
     legend.position = "none",
@@ -363,3 +413,118 @@ p_mol_character <- ggplot(tmp$matrix_data, aes(x = Feature2, y = Database)) +
   )  + labs(x = "", y = "") + # coord_flip() +  
   coord_fixed(ratio = 1) 
 
+# Plot drug MOA Freq ----
+drug_MOA_freq <- data.frame(table(drug_anno$MOA))
+drug_moa <- drug_MOA_freq[!drug_MOA_freq$Var1 %in% c("0",""),]
+all_targets <- c()
+# Loop through each row in the dataframe
+for (i in 1:nrow(drug_moa)) {
+  # Split the compound target by "|"
+  targets <- unlist(strsplit(as.character(drug_moa$Var1[i]), "\\|"))
+  
+  # Repeat each target by its frequency in the original data
+  repeated_targets <- rep(targets, drug_moa$Freq[i])
+  
+  # Add to the all_targets vector
+  all_targets <- c(all_targets, repeated_targets)
+}
+
+# Create a frequency table of individual targets
+target_freq <- table(all_targets)
+
+# Convert to a dataframe
+target_freq_df <- data.frame(
+  Target = names(target_freq),
+  Frequency = as.numeric(target_freq)
+)
+
+# Sort by frequency in descending order
+drug_MOA_freq <- target_freq_df[order(-target_freq_df$Frequency), ]
+top_targets <- drug_MOA_freq %>%
+  filter(Frequency >= 10)
+
+# Create a category for targets with lower frequencies
+# other_targets <- drug_MOA_freq %>%
+#   filter(Frequency < 5) %>%
+#   summarize(Target = "Other targets", Frequency = sum(Frequency))
+
+# Combine the datasets
+# plot_data <- rbind(top_targets, other_targets)
+
+# Create the treemap
+p_drug_moa <- ggplot(top_targets, aes(area = Frequency, fill = Frequency, label = Target)) +
+  geom_treemap() +
+  geom_treemap_text(
+    aes(label = paste0(Target, "\n(", Frequency, ")")),
+    colour = "white",
+    place = "centre",
+    size = 12,
+    grow = TRUE
+  ) +
+  scale_fill_gradient(low = "#56B1F7", high = "#132B43") +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    title = element_text(size = 17, color = "black"),
+    legend.title = element_text(size = 17, colour = "black"),
+    legend.text = element_text(size = 17)
+  ) +
+  labs(
+    title = "Drug MOA Frequency Distribution"
+  )
+
+# Plot sample tumor type ----
+tumor_data <- as.data.frame(
+  table(sample_anno$TumorType)
+)
+colnames(tumor_data) <- c("TumorType", "Frequency")
+
+
+# Group tumor types by system
+tumor_data$System <- case_when(
+  grepl("lung|aerodigestive|nasopharyngeal", tumor_data$TumorType) ~ "Respiratory",
+  grepl("gastrointestinal|stomach|liver|pancreatic", tumor_data$TumorType) ~ "Digestive",
+  grepl("breast|ovarian|cervical|endometrial|uterine|vulvar", tumor_data$TumorType) ~ "Reproductive - Female",
+  grepl("prostate|testicular", tumor_data$TumorType) ~ "Reproductive - Male",
+  grepl("haematopoietic|lymphoid", tumor_data$TumorType) ~ "Blood & Lymphatic",
+  grepl("nervous", tumor_data$TumorType) ~ "Nervous System",
+  grepl("skin", tumor_data$TumorType) ~ "Integumentary",
+  grepl("kidney|bladder", tumor_data$TumorType) ~ "Urinary",
+  grepl("sarcoma", tumor_data$TumorType) ~ "Connective Tissue",
+  TRUE ~ "Other"
+)
+
+# Shorten names for better display
+tumor_data$TumorType <- gsub(" cancer", "", tumor_data$TumorType)
+
+# Create the bubble chart
+p_tumor_bubble <- ggplot(tumor_data, aes(x = System, y = Frequency, size = Frequency, color = System)) +
+  geom_point(alpha = 0.7) +
+  geom_text_repel(
+    aes(label = paste0(TumorType, " (", Frequency, ")")
+    ),
+    color = "black",
+    size = 3.2,
+    box.padding = 0.7,
+    segment.color = "grey50",
+    max.overlaps = Inf
+  ) +
+  scale_size(range = c(3, 15)) +
+  scale_color_brewer(palette = "Set3") +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.text = element_text(size = 17, color = "black"),
+    # panel.grid = element_line(color = "black"),
+    legend.position = "none",
+    plot.title = element_text(size = 17, color = "black", hjust = 0.5)
+  ) +
+  labs(
+    title = "Tumor Type Distribution by System",
+    x = "",
+    y = "Number of Samples"
+  )
+
+
+
+# Others ----

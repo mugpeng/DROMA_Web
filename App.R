@@ -21,7 +21,9 @@ library(effsize)
 # Plot
 library(UpSetR)
 library(ggpubr)
+library(ggrepel)
 library(plotly)
+library(treemapify)
 # library(ggrepel)
 # library(cowplot)
 library(patchwork)
@@ -35,7 +37,7 @@ library(parallel)
 
 # Load ----
 config_list <- config::get(
-  config = "test"
+  # config = "test"
   # Default is production mode
 )
 

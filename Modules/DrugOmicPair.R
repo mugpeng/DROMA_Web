@@ -31,9 +31,51 @@ uiDrugOmicPair <- function(id){
                ns("select_specific_drug"), "Drug Selection:", choices = NULL,
                options = list(
                  placeholder = 'Please select a drug',
-                 onInitialize = I('function() { this.setValue(""); }'), selected = "YM-155"
+                 onInitialize = I('function() { this.setValue(""); }'), selected = "Sepantronium bromide"
                ))
       ),
+    ),
+    # Add data_type and tumor_type filters
+    fluidRow(
+      column(6,
+             selectInput(inputId = ns("data_type"), 
+                         "Filter by data type:", 
+                         choices = c("All" = "all",
+                                     "Cell Lines" = "cell",
+                                     "Patient-Derived Organoids" = "PDO"
+                         ), selected = "all"
+             )),
+      column(6,
+             selectInput(inputId = ns("tumor_type"), 
+                         "Filter by tumor type:", 
+                         choices = c("All" = "all",
+                                     "Aerodigestive Tract Cancer" = "aerodigestive tract cancer",
+                                     "Bladder Cancer" = "bladder cancer",
+                                     "Breast Cancer" = "breast cancer",
+                                     "Cervical Cancer" = "cervical cancer",
+                                     "Choriocarcinoma" = "choriocarcinoma",
+                                     "Endometrial Cancer" = "endometrial cancer",
+                                     "Gastrointestinal Cancer" = "gastrointestinal cancer",
+                                     "Haematopoietic/Lymphoid Cancer" = "haematopoietic/lymphoid cancer",
+                                     "Kidney Cancer" = "kidney cancer",
+                                     "Liver Cancer" = "liver cancer",
+                                     "Lung Cancer" = "lung cancer",
+                                     "Nasopharyngeal Cancer" = "nasopharyngeal cancer",
+                                     "Nervous System Cancer" = "nervous system cancer",
+                                     "Non-Cancer" = "non-cancer",
+                                     "Ovarian Cancer" = "ovarian cancer",
+                                     "Pancreatic Cancer" = "pancreatic cancer",
+                                     "Prostate Cancer" = "prostate cancer",
+                                     "Retinoblastoma" = "retinoblastoma",
+                                     "Sarcoma" = "sarcoma",
+                                     "Skin Cancer" = "skin cancer",
+                                     "Stomach Cancer" = "stomach cancer",
+                                     "Testicular Cancer" = "testicular cancer",
+                                     "Thyroid Cancer" = "thyroid cancer",
+                                     "Uterine Cancer" = "uterine cancer",
+                                     "Vulvar Cancer" = "vulvar cancer"
+                         ), selected = "all"
+             ))
     ),
     # Plot results ----
     wellPanel(
@@ -108,7 +150,7 @@ serverDrugOmicPair <- function(input, output, session){
   updateSelectizeInput(session = session, inputId = 'select_specific_drug',
                        label = 'Drug Selection:', choices = drugs_search$drugs, server = TRUE,
                        options = list(placeholder = 'Please select a drug', onInitialize = I('function() { this.setValue(""); }')),
-                       selected = "YM-155"
+                       selected = "Sepantronium bromide"
   )
   # Produce plot ----
   # Select drug and omic
@@ -116,13 +158,17 @@ serverDrugOmicPair <- function(input, output, session){
     shiny::validate(
       shiny::need(input$select_specific_drug != "", "You are not chosen drug yet.")
     )
-    selFeatures("drug", input$select_specific_drug)
+    selFeatures("drug", input$select_specific_drug, 
+                data_type = input$data_type, 
+                tumor_type = input$tumor_type)
   })
   selected_omic <- reactive({
     shiny::validate(
       shiny::need(input$select_specific_omic != "", "You are not chosen omic yet.")
     )
-    selFeatures(input$select_omics, input$select_specific_omic) 
+    selFeatures(input$select_omics, input$select_specific_omic,
+                data_type = input$data_type,
+                tumor_type = input$tumor_type) 
   })
   # Calculate pair result and plot
   selected_obj <- reactive({
