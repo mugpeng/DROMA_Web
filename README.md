@@ -1,20 +1,8 @@
 # DROMA-DB: Drug Response Omics Association Map, Database
 
-<div class="row">   
-    <div class="column" style="float:left;width:75%"> 
-     	   DROMA-DB is a comprehensive database and analysis tool that integrates the largest published studies investigating cancer response to chemical compounds and the associations between drug sensitivity and multi-omics data (mRNA, CNV, protein, mutation, etc.) across various cancer models including PDC (Patient-Derived Cells), PDO (Patient-Derived Organoids), and PDX, human data are under development.
-    </div>
-    <div class="column" style="float:left;width:25%">    
-        <img src="http://cos01.mugpeng.top/img/20250310150357.png">  
-    </div> 
-</div>
 
 
-
-
-
-
-
+DROMA-DB is a comprehensive database and analysis tool that integrates the largest published studies investigating cancer response to chemical compounds and the associations between drug sensitivity and multi-omics data (mRNA, CNV, protein, mutation, etc.) across various cancer models including PDC (Patient-Derived Cells), PDO (Patient-Derived Organoids), and PDX, human data are under development. ![](http://cos01.mugpeng.top/img/20250310150357.png)
 
 
 
@@ -220,3 +208,16 @@ I will attend UM PhD seminar, welcome!
 - [ ] Add compare methods
 - [ ] Add drug annotation for drug screen in batch mode
 - [ ] 
+
+
+
+# Others
+
+<div class="row">   
+    <div class="column" style="float:left;width:75%"> 
+     	   DROMA-DB is a comprehensive database and analysis tool that integrates the largest published studies investigating cancer response to chemical compounds and the associations between drug sensitivity and multi-omics data (mRNA, CNV, protein, mutation, etc.) across various cancer models including PDC (Patient-Derived Cells), PDO (Patient-Derived Organoids), and PDX, human data are under development.
+    </div>
+    <div class="column" style="float:left;width:25%">    
+        <img src="http://cos01.mugpeng.top/img/20250310150357.png">  
+    </div> 
+</div>
