@@ -4,7 +4,7 @@ load("Input/01/cnv.Rda")
 load("Input/01/meth.Rda")
 load("Input/02/drug_0309.Rda")
 load("Input/05/pdo_deng_0309.Rda")
-# load("Input/06/anno_0309.Rda")
+load("Input/06/anno_0309.Rda")
 
 # Filter ----
 ccle_mRNA <- ccle_exp
@@ -49,6 +49,13 @@ print(paste("Deng1 mRNA:", nrow(deng1_mRNA), "genes retained"))
 print(paste("Deng2 mRNA:", nrow(deng2_mRNA), "genes retained"))
 print(paste("Deng3 mRNA:", nrow(deng3_mRNA), "genes retained"))
 
+# Process anno ----
+drug_anno2 <- apply(drug_anno, 2, function(x){
+  x[x %in% c(0, "")] <- NA
+  x
+})
+drug_anno <- as.data.frame(drug_anno2)
+
 # Save ----
 save(
   ccle_proteinms,
@@ -88,4 +95,10 @@ save(
   deng2_drug,
   deng3_drug,
   file = "Input/02/drug_0314.Rda"
+)
+
+save(
+  drug_anno,
+  sample_anno,
+  file = "Input/06/anno_0314.Rda"
 )

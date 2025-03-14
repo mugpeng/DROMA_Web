@@ -36,7 +36,7 @@ library(parallel)
 # Load ----
 config_list <- config::get(
   config = "test"
-  # Default is production mode
+  # Default is test mode
 )
 
 ## Data----
