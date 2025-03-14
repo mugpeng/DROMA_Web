@@ -13,8 +13,8 @@ tmp$omics_search_CNV <- data.frame(
 
 
 tmp$omics_search_mRNA <- data.frame(
-  omics = c(rownames(ccle_exp),
-            rownames(gdsc_exp),
+  omics = c(rownames(ccle_mRNA),
+            rownames(gdsc_mRNA),
             rownames(deng1_mRNA),
             rownames(deng2_mRNA),
             rownames(deng3_mRNA)
@@ -121,7 +121,7 @@ feas_search <- data.frame(
 
 ## Omics data ----
 ### Continuous ----
-tmp$omic_sel <- c("exp", "meth", "protein", "cnv")
+tmp$omic_sel <- c("mRNA", "meth", "protein", "cnv")
 tmp$tmp1 <- ls()[grepl("_drug$", ls())]
 tmp$drug_vec <- gsub("_drug", "", tmp$tmp1[!grepl("^p_", tmp$tmp1)])
 omics_search_list1 <- list()
@@ -144,9 +144,6 @@ rm(gCSI_mutation_site)
 
 # prepare search vector ----
 fea_list <- list()
-ccle_mRNA <- ccle_exp
-gdsc_mRNA <- gdsc_exp
-rm(ccle_exp); rm(gdsc_exp)
 fea_vec <- c("mRNA", "meth", 
              "proteinrppa", 
              "proteinms",

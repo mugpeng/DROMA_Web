@@ -22,10 +22,8 @@ library(effsize)
 library(UpSetR)
 library(ggpubr)
 library(ggrepel)
-library(plotly)
 library(treemapify)
-# library(ggrepel)
-# library(cowplot)
+# library(plotly)
 library(patchwork)
 
 # Multithreads
@@ -37,7 +35,7 @@ library(parallel)
 
 # Load ----
 config_list <- config::get(
-  # config = "test"
+  config = "test"
   # Default is production mode
 )
 
@@ -48,7 +46,7 @@ source("Modules/LoadData.R")
 source("Modules/Preprocess.R")
 # Welcome notification
 str1 <- "Nice to meet you."
-str2 <- "Very welcome to my version(0.1) —25/01/19"
+str2 <- "Very welcome to my version(0.2) —25/03/14"
 str3 <- "You can visit https://github.com/mugpeng/DROMA_DB to reach the toturial."
 modal_notification <- modalDialog(
   # p("Nice to meet you. \n, test"),

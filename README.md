@@ -1,20 +1,8 @@
 # DROMA-DB: Drug Response Omics Association Map, Database
 
-<div class="row">   
-    <div class="column" style="float:left;width:75%"> 
-     	   DROMA-DB is a comprehensive database and analysis tool that integrates the largest published studies investigating cancer response to chemical compounds and the associations between drug sensitivity and multi-omics data (mRNA, CNV, protein, mutation, etc.) across various cancer models including PDC (Patient-Derived Cells), PDO (Patient-Derived Organoids), and PDX, human data are under development.
-    </div>
-    <div class="column" style="float:left;width:25%">    
-        <img src="http://cos01.mugpeng.top/img/20250310150357.png">  
-    </div> 
-</div>
 
 
-
-
-
-
-
+DROMA-DB is a comprehensive database and analysis tool that integrates the largest published studies investigating cancer response to chemical compounds and the associations between drug sensitivity and multi-omics data (mRNA, CNV, protein, mutation, etc.) across various cancer models including PDC (Patient-Derived Cells), PDO (Patient-Derived Organoids), and PDX, human data are under development. ![](http://cos01.mugpeng.top/img/20250310150357.png)
 
 
 
@@ -69,20 +57,22 @@ D. Tumor type distribution across organ systems. Tumor systems represented inclu
 
 
 
-## Use DROMA-DB shiny
+## Usage
+
+### Use DROMA-DB shiny
 
 Web application can only be accessed in UM campus: http://fscpo.fhs.um.edu.mo:8888/DROMA_DB/
 
 
 
-## Local deployment
+### Local deployment
 
-### Prerequisites
+Prerequisites
 
 - R (>= 4.0.0)
 - RStudio (recommended for ease of use)
 
-### Required R Packages
+Required R Packages
 
 ```r
 # Core packages
@@ -101,6 +91,14 @@ install.packages(c("UpSetR", "ggpubr", "plotly", "patchwork"))
 install.packages(c("snowfall", "parallel"))
 ```
 
+
+
+### Deploy on your server
+
+
+
+
+
 ### Setup
 
 1. Clone the repository:
@@ -115,7 +113,9 @@ install.packages(c("snowfall", "parallel"))
    source("App.R")
    ```
 
-## Usage
+
+
+## Main function
 
 DROMA-DB consists of three main sections:
 
@@ -209,8 +209,8 @@ I will attend UM PhD seminar, welcome!
 
 - [x] Add PDO drug and rna
 - [ ] Reonline
-- [ ] Add PDO WES
 - [ ] change to z-score 
+- [ ] Add PDO WES
 - [ ] add chemical structure info
 
 
@@ -219,4 +219,17 @@ I will attend UM PhD seminar, welcome!
 
 - [ ] Add compare methods
 - [ ] Add drug annotation for drug screen in batch mode
-- [ ] 
+- [ ] filter continous data(zero SD)
+
+
+
+# Others
+
+<div class="row">   
+    <div class="column" style="float:left;width:75%"> 
+     	   DROMA-DB is a comprehensive database and analysis tool that integrates the largest published studies investigating cancer response to chemical compounds and the associations between drug sensitivity and multi-omics data (mRNA, CNV, protein, mutation, etc.) across various cancer models including PDC (Patient-Derived Cells), PDO (Patient-Derived Organoids), and PDX, human data are under development.
+    </div>
+    <div class="column" style="float:left;width:25%">    
+        <img src="http://cos01.mugpeng.top/img/20250310150357.png">  
+    </div> 
+</div>
