@@ -203,28 +203,23 @@ I will attend UM PhD seminar, welcome!
 
 
 
-# TODO
-
-## Major
-
-- [x] Add PDO drug and rna
-- [ ] Reonline
-- [ ] change to z-score 
-- [ ] Add PDO WES
-- [ ] add chemical structure info
-
-
-
-## Minor
-
-- [ ] Add compare methods
-- [ ] Add drug annotation for drug screen in batch mode
-- [ ] filter continous data(zero SD)
-
 
 
 # Others
 
+## Deepcluade
+
+````
+gitingest -o gitingest_output/0314.txt -e rsconnect -e Input -e Output -e Log -e Test -e Others -e images -e readme.md -e .DS_Store -e .Rproj.user -e .Rhistory
+````
+
+
+
+
+
+# Archive
+
+```
 <div class="row">   
     <div class="column" style="float:left;width:75%"> 
      	   DROMA-DB is a comprehensive database and analysis tool that integrates the largest published studies investigating cancer response to chemical compounds and the associations between drug sensitivity and multi-omics data (mRNA, CNV, protein, mutation, etc.) across various cancer models including PDC (Patient-Derived Cells), PDO (Patient-Derived Organoids), and PDX, human data are under development.
@@ -233,3 +228,4 @@ I will attend UM PhD seminar, welcome!
         <img src="http://cos01.mugpeng.top/img/20250310150357.png">  
     </div> 
 </div>
+```

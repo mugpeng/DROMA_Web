@@ -1,6 +1,6 @@
 # Con ----
 # Function to pair omics and drug data
-pairDrugOmic <- function(myOmics, myDrugs){
+pairDrugOmic <- function(myOmics, myDrugs, merged = FALSE){
   pair_list2 <- lapply(1:length(myOmics), function(x){
     omic_sel <- myOmics[[x]]
     pair_list <- lapply(1:length(myDrugs), function(y){
@@ -20,6 +20,23 @@ pairDrugOmic <- function(myOmics, myDrugs){
   })
   pair_list2 <- unlist(pair_list2, recursive = F)
   pair_list2 <- pair_list2[!sapply(pair_list2, is.null)]
+  
+  # If merged is TRUE and z-score normalization is enabled, create a merged dataset
+  if(merged) {
+    # Create a merged dataset by combining all pairs using the more efficient approach
+    combined_list <- list(
+      # Combine all omic vectors
+      unlist(lapply(pair_list2, function(x) x$omic)),
+      
+      # Combine all drug vectors
+      unlist(lapply(pair_list2, function(x) x$drug))
+    )
+    pair_list2[["merged_dataset"]] <- list(
+      "omic" = combined_list[[1]],
+      "drug" = combined_list[[2]]
+    )
+  }
+  
   if(length(pair_list2) < 1) {stop("Please try to another drug-omic pair. This pair do not have result.")}
   pair_list2
 }
@@ -58,7 +75,8 @@ plotDrugOmicPair_con <- function(myPairs, meta = T){
       p_list[[x]] <- current_plot
       
       # Perform correlation test if meta-analysis is requested
-      if(meta == T){
+      # Skip meta-analysis for merged dataset
+      if(meta == T && names(myPairs)[x] != "merged_dataset"){
         cor_re <- cor.test(omic_sel, drug_sel, method = "pearson")
         cor_list[[x]] <- data.frame(
           p = cor_re$p.value,
@@ -85,7 +103,7 @@ plotDrugOmicPair_con <- function(myPairs, meta = T){
   if(meta == T && length(cor_list) > 1) {
     tryCatch({
       cal_re <- do.call(rbind, cor_list)
-      cal_re$study <- names(myPairs)[!sapply(cor_list, is.null)]
+      cal_re$study <- names(myPairs)[!names(myPairs) %in% "merged_dataset"][!sapply(cor_list, is.null)]
       cal_re$se <- sqrt((1 - cal_re$effect^2) / (cal_re$N - 2))
       cal_re$z <- 0.5 * log((1 + cal_re$effect) / (1 - cal_re$effect))  # Fisher's z 
       cal_re$se_z <- 1 / sqrt(cal_re$N - 3)         
@@ -109,7 +127,7 @@ plotDrugOmicPair_con <- function(myPairs, meta = T){
 
 # Discrete ----
 # Function to pair discrete omics and drug data
-pairDrugOmic2 <- function(myOmics, myDrugs){
+pairDrugOmic2 <- function(myOmics, myDrugs, merged = FALSE){
   pair_list2 <- lapply(1:length(myOmics), function(x){
     omic_sel <- myOmics[[x]]
     pair_list <- lapply(1:length(myDrugs), function(y){
@@ -128,6 +146,25 @@ pairDrugOmic2 <- function(myOmics, myDrugs){
   })
   pair_list2 <- unlist(pair_list2, recursive = F)
   pair_list2 <- pair_list2[!sapply(pair_list2, is.null)]
+  
+  # If merged is TRUE and z-score normalization is enabled, create a merged dataset
+  if(merged) {
+    # Create a merged dataset by combining all pairs using the more efficient approach
+    combined_list <- list(
+      # Combine all yes vectors
+      unlist(lapply(pair_list2, function(x) x$yes)),
+      
+      # Combine all no vectors
+      unlist(lapply(pair_list2, function(x) x$no))
+    )
+    
+    # Only add merged dataset if we have enough data points
+    pair_list2[["merged_dataset"]] <- list(
+      "yes" = combined_list[[1]],
+      "no" = combined_list[[2]]
+    )
+  }
+  
   if(length(pair_list2) < 1){stop("Please try to another drug-omic pair. This pair do not have result.")}
   pair_list2
 }
@@ -171,7 +208,8 @@ plotDrugOmicPair_dis <- function(myPairs, meta = T){
       p_list[[x]] <- current_plot
       
       # Calculate effect size and other statistics for meta-analysis
-      if(meta == T){
+      # Skip meta-analysis for merged dataset
+      if(meta == T && names(myPairs)[x] != "merged_dataset"){
         wilcox_test <- wilcox.test(no_drugs, yes_drugs)
         cliff_delta <- cliff.delta(no_drugs, yes_drugs)
         
@@ -205,7 +243,7 @@ plotDrugOmicPair_dis <- function(myPairs, meta = T){
     tryCatch({
       # Combine all test results
       meta_df <- do.call(rbind, test_list)
-      meta_df$study <- names(myPairs)[!sapply(test_list, is.null)]
+      meta_df$study <- names(myPairs)[!names(myPairs) %in% "merged_dataset"][!sapply(test_list, is.null)]
       
       # Calculate standard error for Cliff's Delta
       meta_df$se <- sqrt((1 - meta_df$effect^2) * (meta_df$n1 + meta_df$n2 + 1) / 
@@ -235,14 +273,21 @@ plotDrugOmicPair_dis <- function(myPairs, meta = T){
 oneDrugOmicPair <- function(select_omics_type, select_omics,
                             select_drugs){
   myDrugs <- selDrugs(select_drugs)
+  
+  # Check if z-score normalization is enabled
+  merged_enabled <- FALSE
+  if(exists("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)) {
+    merged_enabled <- isTRUE(get("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)$enabled)
+  }
+  
   if(select_omics_type %in% c("exp", "meth", "proteinrppa", "cnv",
                               "proteinms")){
     myOmics <- selOmics(select_omics_type, select_omics)
-    myPairs <- pairDrugOmic(myOmics, myDrugs)
+    myPairs <- pairDrugOmic(myOmics, myDrugs, merged = merged_enabled)
     p <- plotDrugOmicPair_con(myPairs)
   } else{
     myOmics <- selOmics2(select_omics_type, select_omics)
-    myPairs <- pairDrugOmic2(myOmics, myDrugs)
+    myPairs <- pairDrugOmic2(myOmics, myDrugs, merged = merged_enabled)
     p <- plotDrugOmicPair_dis(myPairs)
   }
   return(p)

@@ -152,10 +152,30 @@ fea_vec <- c("mRNA", "meth",
              "mutation_gene", "mutation_site", "fusion" # discrete
 )
 fea_list <- sapply(fea_vec, function(x){
+  # Get all objects with the pattern "_x" (e.g., "_drug")
   i2 <- paste0("_", x)
   i2 <- ls(globalenv())[grepl(i2, ls(globalenv()))]
-  i2 <- i2[!grepl("p_", i2)]
-  i2 <- i2[!grepl("drugs", i2)]
+  
+  # Filter out objects by name patterns
+  i2 <- i2[!grepl("p_", i2)]          # Exclude p_ prefixed objects
+  i2 <- i2[!grepl("drugs", i2)]       # Exclude objects with "drugs" in name
+  i2 <- i2[!grepl("normalize", i2)]   # Exclude zscore_normalize_drug
+  i2 <- i2[!grepl("apply", i2)]       # Exclude apply_zscore functions
+  i2 <- i2[!grepl("reset", i2)]       # Exclude reset functions
+  i2 <- i2[!grepl("function", i2)]    # Exclude any function-related names
+  
+  # Only keep known dataset prefixes to ensure we only get actual datasets
+  # This is a whitelist approach which is safer
+  known_prefixes <- c("ccle", "gdsc", "gCSI", "ctrp1", "ctrp2", "prism", 
+                     "deng1", "deng2", "deng3")
+  
+  # Extract the prefix (everything before "_x")
+  prefixes <- gsub(paste0("_", x), "", i2)
+  
+  # Only keep objects with known dataset prefixes
+  i2 <- i2[prefixes %in% known_prefixes]
+  
+  # Extract the dataset name by removing the suffix
   i <- gsub(paste0("_", x), "", i2)
   return(i)
 })

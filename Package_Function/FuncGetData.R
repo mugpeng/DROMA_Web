@@ -5,7 +5,8 @@
 # @param data_type Filter by data type: "all" (default), "cell" (cell lines only), or "PDO" (patient-derived organoids only)
 # @param tumor_type Filter by tumor type: "all" (default) or any specific tumor type (e.g., "lung cancer", "breast cancer")
 # @return A list of selected features filtered by the specified data type and tumor type
-selFeatures <- function(select_feas_type, select_feas, data_type = "all", tumor_type = "all") {
+selFeatures <- function(select_feas_type, select_feas, 
+                        data_type = "all", tumor_type = "all") {
   if(!select_feas_type %in% c("mRNA","cnv",
                                "meth", "proteinrppa", "proteinms", # continuous
                                "mutation_gene", "mutation_site", "fusion", # discrete

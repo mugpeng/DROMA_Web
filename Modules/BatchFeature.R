@@ -167,6 +167,19 @@ uiBatchFeature <- function(id){
 serverBatchFeature <- function(input, output, session){
   ns <- session$ns
   
+  # Track z-score changes
+  zscore_tracker <- reactiveVal(if(exists("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)) 
+                               base::get("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)$timestamp 
+                               else Sys.time())
+  
+  # Update tracker when global state changes
+  observe({
+    if(exists("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)) {
+      zscore_tracker(base::get("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)$timestamp)
+    }
+    invalidateLater(1000) # Check every second
+  })
+  
   # Add reactive values for progress tracking
   progress_vals <- reactiveValues(
     start_time = NULL,
@@ -200,6 +213,9 @@ serverBatchFeature <- function(input, output, session){
   
   # Calculate results ----
   results <- reactive({
+    # React to z-score changes
+    zscore_tracker()
+    
     req(input$select_features1, input$select_features2, input$select_specific_feature)
     
     # Show progress box
