@@ -210,21 +210,21 @@ serverDrugOmicPair <- function(input, output, session){
       selected_pair <- pairDrugOmic2(selected_omic(), selected_drug(), merged = merged_enabled)
       re <- plotDrugOmicPair_dis(selected_pair)     
     }
-    # modidy plot
-    plot_with_axis <- create_plot_with_common_axes(re[[1]], 
-                                           x_title = "Molecular State(mRNA expression or Mutation status)", 
-                                           y_title = "drug sensitivity (higher indicates resistance)")
     if(length(re)>1){
       return(
-        list(plot = plot_with_axis, meta = re[[2]], data = selected_pair)
+        list(plot = re[[1]], meta = re[[2]], data = selected_pair)
       )
     } else {
-      return(list(plot = plot_with_axis, data = selected_pair))
+      return(list(plot = re[[1]], data = selected_pair))
     }
   })
   
   output$patchPlot <- renderPlot({
-    selected_obj()$plot()
+    # modidy plot
+    plot_with_axis <- create_plot_with_common_axes(selected_obj()$plot, 
+                                                   x_title = "Molecular State(mRNA expression or Mutation status)", 
+                                                   y_title = "drug sensitivity (higher indicates resistance)")
+    plot_with_axis()
   })
   
   output$metaPlot <- renderPlot({
