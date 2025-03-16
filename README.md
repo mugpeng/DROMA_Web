@@ -57,20 +57,22 @@ D. Tumor type distribution across organ systems. Tumor systems represented inclu
 
 
 
-## Use DROMA-DB shiny
+## Usage
+
+### Use DROMA-DB shiny
 
 Web application can only be accessed in UM campus: http://fscpo.fhs.um.edu.mo:8888/DROMA_DB/
 
 
 
-## Local deployment
+### Local deployment
 
-### Prerequisites
+Prerequisites
 
 - R (>= 4.0.0)
 - RStudio (recommended for ease of use)
 
-### Required R Packages
+Required R Packages
 
 ```r
 # Core packages
@@ -89,6 +91,14 @@ install.packages(c("UpSetR", "ggpubr", "plotly", "patchwork"))
 install.packages(c("snowfall", "parallel"))
 ```
 
+
+
+### Deploy on your server
+
+
+
+
+
 ### Setup
 
 1. Clone the repository:
@@ -103,7 +113,9 @@ install.packages(c("snowfall", "parallel"))
    source("App.R")
    ```
 
-## Usage
+
+
+## Main function
 
 DROMA-DB consists of three main sections:
 
@@ -191,27 +203,21 @@ I will attend UM PhD seminar, welcome!
 
 
 
-# TODO
-
-## Major
-
-- [x] Add PDO drug and rna
-- [ ] Reonline
-- [ ] Add PDO WES
-- [ ] change to z-score 
-- [ ] add chemical structure info
-
-
-
-## Minor
-
-- [ ] Add compare methods
-- [ ] Add drug annotation for drug screen in batch mode
-- [ ] 
-
 
 
 # Others
+
+## Deepcluade
+
+````
+gitingest -o gitingest_output/0314.txt -e rsconnect -e Input -e Output -e Log -e Test -e Others -e images -e readme.md -e .DS_Store -e .Rproj.user -e .Rhistory
+````
+
+
+
+
+
+# Archive
 
 ```
 <div class="row">   

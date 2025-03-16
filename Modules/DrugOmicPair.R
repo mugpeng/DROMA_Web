@@ -77,7 +77,7 @@ uiDrugOmicPair <- function(id){
                          ), selected = "all"
              ))
     ),
-    # Plot results ----
+    # plot results ----
     wellPanel(
       # textOutput("total")
       column(12, plotOutput(ns("patchPlot"), height="20cm")),
@@ -88,8 +88,6 @@ uiDrugOmicPair <- function(id){
     fluidRow(
       column(6,
              h4(strong("NOTEs:")),
-             h5("The y axis is the drug sensitivity metric."),
-             h5("The x-axis represents the molecular state or numerical data, including the boolean state for gene mutations or mRNA expression."),
              h5("Given that there are overlapping cells in different drug and omics datasets, we have utilized the common data to assess correlations, thereby maximizing the utilization of existing information. For instance, the designation 'gdsc_ctrp1' indicates that the omics data is sourced from the GDSC project, while the drug sensitivity data is derived from the CTRP1 project.")
       ),
       column(6,
@@ -126,6 +124,20 @@ uiDrugOmicPair <- function(id){
 
 serverDrugOmicPair <- function(input, output, session){
   ns <- session$ns
+  
+  # Track z-score changes
+  zscore_tracker <- reactiveVal(if(exists("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)) 
+                               base::get("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)$timestamp 
+                               else Sys.time())
+  
+  # Update tracker when global state changes
+  observe({
+    if(exists("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)) {
+      zscore_tracker(base::get("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)$timestamp)
+    }
+    invalidateLater(1000) # Check every second
+  })
+  
   # Select ----
   ## Omics ----
   omics_search_sel <- reactiveValues()
@@ -152,9 +164,13 @@ serverDrugOmicPair <- function(input, output, session){
                        options = list(placeholder = 'Please select a drug', onInitialize = I('function() { this.setValue(""); }')),
                        selected = "Sepantronium bromide"
   )
+  
   # Produce plot ----
   # Select drug and omic
   selected_drug <- reactive({
+    # React to z-score changes
+    zscore_tracker()
+    
     shiny::validate(
       shiny::need(input$select_specific_drug != "", "You are not chosen drug yet.")
     )
@@ -162,7 +178,11 @@ serverDrugOmicPair <- function(input, output, session){
                 data_type = input$data_type, 
                 tumor_type = input$tumor_type)
   })
+  
   selected_omic <- reactive({
+    # React to z-score changes
+    zscore_tracker()
+    
     shiny::validate(
       shiny::need(input$select_specific_omic != "", "You are not chosen omic yet.")
     )
@@ -170,14 +190,24 @@ serverDrugOmicPair <- function(input, output, session){
                 data_type = input$data_type,
                 tumor_type = input$tumor_type) 
   })
+  
   # Calculate pair result and plot
   selected_obj <- reactive({
+    # React to z-score changes
+    zscore_tracker()
+    
+    # Check if z-score normalization is enabled
+    merged_enabled <- FALSE
+    if(exists("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)) {
+      merged_enabled <- isTRUE(base::get("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)$enabled)
+    }
+    
     if (input$select_omics %in% c("mRNA", "meth", "cnv",
                                   "proteinrppa", "proteinms")) {
-      selected_pair <- pairDrugOmic(selected_omic(), selected_drug())
+      selected_pair <- pairDrugOmic(selected_omic(), selected_drug(), merged = merged_enabled)
       re <- plotDrugOmicPair_con(selected_pair)    
     } else{
-      selected_pair <- pairDrugOmic2(selected_omic(), selected_drug()) 
+      selected_pair <- pairDrugOmic2(selected_omic(), selected_drug(), merged = merged_enabled)
       re <- plotDrugOmicPair_dis(selected_pair)     
     }
     if(length(re)>1){
@@ -188,9 +218,15 @@ serverDrugOmicPair <- function(input, output, session){
       return(list(plot = re[[1]], data = selected_pair))
     }
   })
+  
   output$patchPlot <- renderPlot({
-    selected_obj()$plot
+    # modidy plot
+    plot_with_axis <- create_plot_with_common_axes(selected_obj()$plot, 
+                                                   x_title = "Molecular State(mRNA expression or Mutation status)", 
+                                                   y_title = "drug sensitivity (higher indicates resistance)")
+    plot_with_axis()
   })
+  
   output$metaPlot <- renderPlot({
     req(selected_obj()$meta)  
     p_val <- selected_obj()$meta$pval.random
@@ -213,6 +249,7 @@ serverDrugOmicPair <- function(input, output, session){
                  text.random = p_text
     )
   })
+  
   # Add download handler
   output$download_content <- downloadHandler(
     filename = function() {

@@ -9,9 +9,10 @@ tmp <- list()
 
 # Select mini test/development data 
 ```{r}
-load(file = "Output/01/exp.Rda")
-load(file = "Output/01/cnv.Rda")
-load(file = "Output/01/meth.Rda")
+load(file = "Input/01/exp.Rda")
+load(file = "Input/01/cnv.Rda")
+load(file = "Input/01/meth.Rda")
+load(file = "Input/01/protein.Rda")
 ```
 
 Extract these three omics:
@@ -28,9 +29,12 @@ for(i in vars){
 ```{r}
 # exp
 save(
-  ccle_exp,
-  gdsc_exp,
-  file = "Output/03/exp.Rda"
+  ccle_mRNA,
+  gdsc_mRNA,
+  deng1_mRNA,
+  deng2_mRNA,
+  deng3_mRNA,
+  file = "Input/03/exp.Rda"
 )
 
 # cnv
@@ -38,12 +42,19 @@ save(
   ccle_cnv,
   gdsc_cnv,
   gCSI_cnv,
-  file = "Output/03/cnv.Rda"
+  file = "Input/03/cnv.Rda"
 )
 
 # meth
 save(
   ccle_meth,
-  file = "Output/03/meth.Rda"
+  file = "Input/03/meth.Rda"
+)
+
+# Protein
+save(
+  ccle_proteinms,
+  ccle_proteinrppa,
+  file = "Input/03/protein.Rda"
 )
 ```
