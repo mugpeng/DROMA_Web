@@ -6,7 +6,8 @@
 - [ ] Reonline
 - [x] change to z-score 
 - [ ] Add PDO WES
-- [ ] add chemical structure info
+- [ ] recheck cellline WES results
+- [ ] add chemical structure info 
 
 
 
