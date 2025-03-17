@@ -167,6 +167,7 @@ fea_list <- sapply(fea_vec, function(x){
   # Only keep known dataset prefixes to ensure we only get actual datasets
   # This is a whitelist approach which is safer
   known_prefixes <- c("ccle", "gdsc", "gCSI", "ctrp1", "ctrp2", "prism", 
+                      "gdsc1", "gdsc2",
                      "deng1", "deng2", "deng3")
   
   # Extract the prefix (everything before "_x")

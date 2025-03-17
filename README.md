@@ -61,7 +61,7 @@ D. Tumor type distribution across organ systems. Tumor systems represented inclu
 
 ### Use DROMA-DB shiny
 
-Web application can only be accessed in UM campus: http://fscpo.fhs.um.edu.mo:8888/DROMA_DB/
+Web application can only be accessed in UM campus: http://fscpo.fhs.um.edu.mo/DROMA_DB/
 
 
 
@@ -95,6 +95,140 @@ install.packages(c("snowfall", "parallel"))
 
 ### Deploy on your server
 
+ref: [How to Deploy Interactive R Apps with Shiny Server | Linode Docs](https://www.linode.com/docs/guides/how-to-deploy-rshiny-server-on-ubuntu-and-debian/)
+
+```
+sudo apt-get install r-base
+
+sudo R -e "install.packages('shiny', repos = 'https://mirror.tuna.tsinghua.edu.cn/CRAN/')"
+```
+shiny must be in system library.
+
+
+
+put shiny server content under `/srv/shiny-server/`, I use soft link:
+
+```
+$ ls  -lh /srv/shiny-server/
+total 0
+lrwxrwxrwx 1 shiny shiny 21 Jan 21 14:54 DROMA_DB -> /home/shiny/DROMA_DB/
+lrwxrwxrwx 1 root  root  38 Apr  3  2024 index.html -> /opt/shiny-server/samples/welcome.html
+lrwxrwxrwx 1 shiny shiny 23 Apr  9  2024 OmicsPharDB -> /home/shiny/OmicsPharDB
+lrwxrwxrwx 1 root  root  37 Apr  3  2024 sample-apps -> /opt/shiny-server/samples/sample-apps
+```
+
+
+
+
+
+```
+# bash Miniconda3-latest-Linux-x86_64.sh
+
+# mamba install -y r-base
+```
+
+```
+sudo apt-get install gdebi-core
+```
+
+```
+wget https://download3.rstudio.org/ubuntu-18.04/x86_64/shiny-server-1.5.21.1012-amd64.deb
+
+sudo gdebi shiny-server-1.5.21.1012-amd64.deb
+```
+
+![](https://raw.githubusercontent.com/mugpeng/mugpeng-my-gallery-02/main/img20250317184713.png)
+
+安装shiny：
+```
+sudo su - -c "R -e \"install.packages('bslib')\""
+sudo su - -c "R -e \"install.packages('sass')\""
+sudo su - -c "R -e \"install.packages('shiny')\""
+
+# sudo R -e "install.packages('shiny', repos = 'https://mirror.tuna.tsinghua.edu.cn/CRAN/')"
+```
+
+```
+less /etc/shiny-server/shiny-server.conf
+# shiny-server.conf
+```
+
+deploy on target ports:
+
+```
+$ cat /etc/shiny-server/shiny-server.conf 
+# Instruct Shiny Server to run applications as the user "shiny"
+run_as shiny;
+
+# Define a server that listens on port 3838
+server {
+  listen 8888;
+
+  # Define a location at the base URL
+  location / {
+
+    # Host the directory of Shiny Apps stored in this directory
+    site_dir /srv/shiny-server;
+
+    # Log all Shiny output to files in this directory
+    log_dir /var/log/shiny-server;
+
+    # When a user visits the base URL rather than a particular application,
+    # an index of the applications available in this directory will be shown.
+    directory_index on;
+  }
+}
+```
+
+log:
+
+```
+cat /var/log/shiny-server/
+```
+
+
+
+also need to install these packages:
+
+```
+install.packages("pacman")
+pacman::p_load(
+  shiny,         # Shiny application framework
+  shinyWidgets,  # Shiny widgets
+  shinyjs,       # JavaScript functionalities for Shiny
+  waiter,        # Loading screens and waiters
+  DT,            # Data tables for Shiny
+  dplyr,         # Data manipulation
+  data.table,    # Fast data processing
+  meta,          # Meta-analysis
+  metafor,       # Meta-analysis with advanced methods
+  effsize,       # Effect size calculations
+  UpSetR,        # Visualizing set intersections
+  ggpubr,        # Publication-ready plots
+  plotly,        # Interactive plots
+  grid, gridExtra, # plots
+  ggrepel,       # label top features
+  treemapify,    # tree plot
+  patchwork,     # Arranging and combining plots
+  snowfall,      # Parallel computing with snow
+  parallel       # Parallel computation
+)
+```
+
+
+
+start shiny:
+
+```
+sudo systemctl start shiny-server
+sudo systemctl stop shiny-server
+sudo systemctl restart shiny-server
+# or
+service shiny-server status
+service shiny-server restart
+service shiny-server stop 
+```
+
 
 
 
@@ -117,7 +251,7 @@ install.packages(c("snowfall", "parallel"))
 
 ## Main function
 
-DROMA-DB consists of three main sections:
+DROMA-DB consists of two main sections:
 
 ### 1. Drugs-Omics Pairs Analysis
 
@@ -148,6 +282,20 @@ This module helps you conduct significant tests between a targeted feature (a dr
 A. Volcano plot showing associations between Bortezomib and mRNA expression. The x-axis represents effect size (strength and direction of association), while the y-axis shows statistical significance (-log10 p-value). Red points indicate significant positive associations (effect size > 0.2, p < 0.001), suggesting resistance markers; blue points show significant negative associations, suggesting sensitivity markers. The effect size is calculated from meta analysis which each feature pairs use different statistic method depends on data type: 1) For continuous vs. continuous features (e.g., drug vs. mRNA): Pearson correlation; 2) For discrete vs. continuous features (e.g., mutation vs. drug), Wilcoxon test; 3) For discrete vs. discrete features (e.g., mutation vs. fusion): Chi-squared test. PSMB5 may server as a potential Bortezomib resistance gene from screen.
 B. All results are downloadable in various formats (PDF, CSV, R objects) for further analysis.
 C. A popup window can remind user the completion of analysis.
+
+
+
+### Global settings
+
+On the left of screen there is a floating widget:
+
+![](https://raw.githubusercontent.com/mugpeng/mugpeng-my-gallery-02/main/img20250317193042.png)
+
+
+
+After clicking it, you could do some global settings:
+
+![](https://raw.githubusercontent.com/mugpeng/mugpeng-my-gallery-02/main/img20250317193117.png)
 
 
 

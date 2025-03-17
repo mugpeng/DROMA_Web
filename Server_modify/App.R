@@ -21,9 +21,10 @@ library(effsize)
 # Plot
 library(UpSetR)
 library(ggpubr)
-library(plotly)
-# library(ggrepel)
-# library(cowplot)
+library(ggrepel)
+library(treemapify)
+library(gridExtra)
+library(grid)
 library(patchwork)
 
 # Multithreads
@@ -34,19 +35,18 @@ library(parallel)
 # library(reactlog)
 
 # Load ----
-config_list <- config::get(
-  # config = "test"
-  # Default is production mode
-)
+# config_list <- config::get(
+#   # config = "test"
+#   # Default is test mode
+# )
 
-## Data----
+## Load Data and Preprocess ----
 source("Modules/LoadData.R")
-
-## Preprocess ----
 source("Modules/Preprocess.R")
+
 # Welcome notification
 str1 <- "Nice to meet you."
-str2 <- "Very welcome to my version(0.1) —25/01/19"
+str2 <- "Very welcome to my version(0.2) —25/03/14"
 str3 <- "You can visit https://github.com/mugpeng/DROMA_DB to reach the toturial."
 modal_notification <- modalDialog(
   # p("Nice to meet you. \n, test"),
@@ -61,17 +61,23 @@ modal_notification <- modalDialog(
 source("Package_Function/FuncGetData.R")
 source("Package_Function/FuncDrugOmicPair.R")
 source("Package_Function/FuncBatchFeature.R")
+source("Package_Function/FuncZscoreWhole.R")
+source("Package_Function/FuncPlot.R")
 
 ## Modules----
 source("Modules/DrugOmicPair.R")
 source("Modules/BatchFeature.R")
 source("Modules/StatAnno.R")
+source("Modules/GlobalSetting.R")
 
 # UI ----
 ui <- tagList(
   tags$head(
     tags$title("DROMA(Drug Response Omics association MAp)"),
   ),
+  useShinyjs(),  # Enable shinyjs
+  # Global Settings Module
+  uiGlobalSetting("GlobalSetting"),
   autoWaiter(html = spin_loader(), color = transparent(0.5)),
   navbarPage("DROMA(Drug Response Omics association MAp)",
              ## Drugs-omics pairs analysis ----
@@ -94,11 +100,10 @@ ui <- tagList(
                         p("Email: mugpeng@outlook.com"),
                         p("Email: yc47680@um.edu.mo"),
                         p("github: https://github.com/mugpeng"),
-                        # p("You can visit https://github.com/mugpeng/DROMA_DB to reach the toturial.")
+                        p("You can visit https://github.com/mugpeng/DROMA_DB to reach the toturial.")
                       ))
   )
 )
-  
   
 # Server ----
 server <- function(input, output, session) {
@@ -107,6 +112,10 @@ server <- function(input, output, session) {
   observeEvent(input$close_modal, {
     removeModal()
   })
+  
+  # Initialize Global Settings Module
+  callModule(serverGlobalSetting, "GlobalSetting")
+  
   # stop warn
   storeWarn <- getOption("warn")
   options(warn = -1) 
@@ -117,7 +126,6 @@ server <- function(input, output, session) {
   # Statistics and Annotations ----
   callModule(serverStatAnno, "StatAnno")
 }
-  
   
 # Run ----
 shinyApp(ui = ui, server = server)
