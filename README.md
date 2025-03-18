@@ -46,7 +46,6 @@ This section provides overview statistics about the database:
 - Molecular characteristics available in each dataset
 - Drug and sample overlap between datasets
 - Tumor type distribution
-- Drug mechanism of action visualization
 
 ![](http://cos01.mugpeng.top/img/20250310150835.png)
 
@@ -348,6 +347,19 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 I will attend UM PhD seminar, welcome!
 <img width="446" alt="image" src="https://github.com/user-attachments/assets/72adc553-f807-48f8-afa8-bb4009eef963" />
+
+
+
+### 0318 v0.2
+
+The stable version v0.2 is online now in UM network: http://fscpo.fhs.um.edu.mo/DROMA_DB/
+Btw, please be patient, it may take 10-20s when first time start it. :)
+
+This update includes:
+1) Add denglab three PDO data(deng1(breast), deng2(colon), deng3(nasopharynx)) with paired RNAseq, IC50 and annotation data;
+2) Harmonize cell line drug and cell names also the annotation data;
+3) Add choice to filter data for a specific tumor type(Breast, lung..) or data type(cell line, PDO), and a global setting page to set data. Now all continous data is transformed to by z-score in default, which allow to add a merged result for visualization ;
+4) Add several figures and some visualization-related improvement.
 
 
 
