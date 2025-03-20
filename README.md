@@ -64,31 +64,53 @@ Web application can only be accessed in UM campus: http://fscpo.fhs.um.edu.mo/DR
 
 
 
-### Local deployment
+### Deploy locally
 
-Prerequisites
-
-- R (>= 4.0.0)
-- RStudio (recommended for ease of use)
-
-Required R Packages
-
-```r
-# Core packages
-install.packages(c("shiny", "shinyWidgets", "shinyjs", "waiter", "DT", "config"))
-
-# Data manipulation
-install.packages(c("dplyr", "data.table"))
-
-# Meta analysis
-install.packages(c("meta", "metafor", "effsize"))
-
-# Visualization
-install.packages(c("UpSetR", "ggpubr", "plotly", "patchwork"))
-
-# Parallel processing
-install.packages(c("snowfall", "parallel"))
+install the relative packages:
 ```
+install.packages("pacman")
+pacman::p_load(
+  shiny,         # Shiny application framework
+  shinyWidgets,  # Shiny widgets
+  shinyjs,       # JavaScript functionalities for Shiny
+  waiter,        # Loading screens and waiters
+  DT,            # Data tables for Shiny
+  dplyr,         # Data manipulation
+  data.table,    # Fast data processing
+  meta,          # Meta-analysis
+  metafor,       # Meta-analysis with advanced methods
+  effsize,       # Effect size calculations
+  UpSetR,        # Visualizing set intersections
+  ggpubr,        # Publication-ready plots
+  plotly,        # Interactive plots
+  grid, gridExtra, # plots
+  ggrepel,       # label top features
+  treemapify,    # tree plot
+  patchwork,     # Arranging and combining plots
+  snowfall,      # Parallel computing with snow
+  parallel       # Parallel computation
+)
+```
+
+
+
+download the input data to `Input/`: [Input data for DROMA_DB](https://zenodo.org/records/15055906)
+
+1. Clone the repository:
+
+   ```
+   git clone https://github.com/yourusername/DROMA-DB.git
+   ```
+
+2. Open the project in RStudio by clicking on the `Project.Rproj` file.
+
+3. Run the application:
+
+   ```r
+   source("App.R")
+   ```
+
+
 
 
 
@@ -227,24 +249,6 @@ service shiny-server status
 service shiny-server restart
 service shiny-server stop 
 ```
-
-
-
-
-
-### Setup
-
-1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/DROMA-DB.git
-   ```
-
-2. Open the project in RStudio by clicking on the `Project.Rproj` file.
-
-3. Run the application:
-   ```r
-   source("App.R")
-   ```
 
 
 
