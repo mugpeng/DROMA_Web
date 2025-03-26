@@ -160,7 +160,7 @@ sudo gdebi shiny-server-1.5.21.1012-amd64.deb
 
 ![](https://raw.githubusercontent.com/mugpeng/mugpeng-my-gallery-02/main/img20250317184713.png)
 
-安装shiny：
+install shiny：
 ```
 sudo su - -c "R -e \"install.packages('bslib')\""
 sudo su - -c "R -e \"install.packages('sass')\""
@@ -174,14 +174,14 @@ less /etc/shiny-server/shiny-server.conf
 # shiny-server.conf
 ```
 
-deploy on target ports:
+deploy on target ports, I change it from default `3838` to `8888`:
 
 ```
 $ cat /etc/shiny-server/shiny-server.conf 
 # Instruct Shiny Server to run applications as the user "shiny"
 run_as shiny;
 
-# Define a server that listens on port 3838
+# Define a server that listens on port 8888
 server {
   listen 8888;
 
@@ -334,7 +334,7 @@ DROMA-DB integrates data from multiple sources:
 
 Feel free to contact us if you find any bugs or have any suggestions:
 
-- Email: mugpeng@foxmail.com, mugpeng@outlook.com, yc47680@um.edu.mo
+- Email: yc47680@um.edu.mo
 - GitHub: https://github.com/mugpeng
 
 

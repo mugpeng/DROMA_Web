@@ -5,12 +5,11 @@
 - [x] Add PDO drug and rna
 - [x] Reonline
 - [x] change to z-score 
-- [ ] server check (use forever or others to keep shiny alive)
+- [x] server check1 (process die)
+- [ ] server check2 (make shiny load faster)
   - Preloading noticed screen
   - options(shiny.idle_timeout = 0)
   - Using the future and promises packages to run computations asynchronously
-  - 
-
 - [ ] adapt to mobile user
 - [ ] Add data ranking check(allow user highlight interested features), drug rank(select a cell) and cell rank(select a feature)
 - [ ] Add PDO WES
