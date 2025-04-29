@@ -3,10 +3,8 @@
 
 
 DROMA-DB is a comprehensive database and analysis tool that integrates the largest published studies investigating cancer response to chemical compounds and the associations between drug sensitivity and multi-omics data (mRNA, CNV, protein, mutation, etc.) across various cancer models including PDC (Patient-Derived Cells), PDO (Patient-Derived Organoids), and PDX, human data are under development. 
-![](http://cos01.mugpeng.top/img/20250310150357.png)
 
-
-
+![image](https://github.com/user-attachments/assets/89b385e0-f5e4-4d8e-a33b-5f30bed039b2)
 
 deng1-3 are our in house pdo data, others are all pcd data.
 
