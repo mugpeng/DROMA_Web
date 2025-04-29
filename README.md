@@ -6,7 +6,7 @@ DROMA-DB is a comprehensive database and analysis tool that integrates the large
 
 ![image](https://github.com/user-attachments/assets/89b385e0-f5e4-4d8e-a33b-5f30bed039b2)
 
-deng1-3 are our in house pdo data, others are all pcd data.
+deng1-3 are our in house pdo data, others are all cancer cell line data.
 
 <img src="http://cos01.mugpeng.top/img/20250310150259.png" style="zoom:50%;" />
 
