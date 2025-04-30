@@ -302,6 +302,24 @@ After clicking it, you could do some global settings:
 
 
 
+## Other description
+
+z-score:
+
+- Omics data (mRNA, CNV, methylation, protein): Z-score normalization is applied across samples for each gene.
+- Drug data: Z-score normalization is applied row-by-row, where each drug is independently normalized across all cell lines by subtracting its mean and dividing by its standard deviation.
+- Drug-Omic Pair Analysis: A merged dataset plot will be created, combining data from all datasets for a comprehensive view (this merged dataset is excluded from meta-analysis.
+
+
+
+drug metrics:
+
+Except gCSI dataset includes AAC(Area above curve), all others use AUC(area under curve).
+
+Following the principle of least change, AAC values from gCSI are rescaled such that a lower metric indicates higher sensitivity across all datasets. (AAC2 = max(AAC) - AAC)
+
+
+
 ## Project Structure
 
 - **App.R**: Main application file
