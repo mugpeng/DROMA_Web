@@ -8,14 +8,16 @@
 - [x] server check1 (process die)
 - [ ] single data compare, find cell line, compare types(CXP)
   - [ ] Try Co_Occurence(like maftools) part for drugs
-
-- [ ] How to allow user analysis data without loading all datasets locally
 - [ ] Add enrichment methods
+- [ ] Harmonized drug and cell names
+  - [ ] how to build a name checker agent?
+
+- [ ] add raw dose viability part, recomputeAUC using PharmacoGx method,
+- [ ] How to allow user analysis data without loading all datasets locally
 - [ ] reload normalization will cause process dead
 - [ ] Add combintation drugs results parts
   - [ ] in house
   - [ ] synergy prediction
-
 - [ ] server check2 (make shiny load faster)
   - Preloading noticed screen
   - options(shiny.idle_timeout = 0)
@@ -34,13 +36,22 @@
 ## Minor
 
 - [x] filter continous data(zero SD)
-- [ ] add choice to download csv data
+- [x] add choice to download csv data
+- [ ] what para orchestra official used for calculate arc
 - [ ] recheck cellline WES results
 - [ ] Add drug annotation for drug screen in batch mode
 - [ ] volcano plot seems a bug wrongly highlight top5
 - [ ] Add compare methods
 - [ ] Add user counts
 - [ ] adapt to mobile user
+
+
+
+## Function
+
+- [ ] Add ecDNA predict method
+  - MYC ecDNA promotes intratumour heterogeneity and plasticity in PDAC, AmpliconArchitect
+- [ ] 
 
 
 
