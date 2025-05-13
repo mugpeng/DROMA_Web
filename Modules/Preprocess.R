@@ -487,6 +487,7 @@ p_overlap_drug <- upset(fromList(drug_list), mainbar.y.label = "Drug counts", te
 # First, let's create a data frame from your list
 tmp$fea_list2 <- fea_list
 tmp$fea_list2$drug <- NULL
+tmp$fea_list2$drug_raw <- NULL
 tmp$data_types <- names(tmp$fea_list2)
 tmp$databases <- unique(unlist(tmp$fea_list2))
 

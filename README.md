@@ -87,7 +87,7 @@ pacman::p_load(
 
 
 
-download the input data to `Input/`: [Input data for DROMA_DB](https://zenodo.org/records/15055906)
+download the input data to `Input/`: [Input data for DROMA_DB](https://zenodo.org/records/15392760)
 
 1. Clone the repository:
 
