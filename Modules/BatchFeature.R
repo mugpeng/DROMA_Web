@@ -65,7 +65,9 @@ uiBatchFeature <- function(id){
                          "Filter by data type:", 
                          choices = c("All" = "all",
                                      "Cell Lines" = "cell",
-                                     "Patient-Derived Organoids" = "PDO"
+                                     "Patient-Derived Cells" = "PDC",
+                                     "Patient-Derived Organoids" = "PDO",
+                                     "Patient-Derived Xenografts" = "PDX"
                          ), selected = "all"
              )),
       column(6,
@@ -240,7 +242,8 @@ serverBatchFeature <- function(input, output, session){
       feature2_type = input$select_features2,
       data_type = input$data_type,
       tumor_type = input$tumor_type,
-      cores = used_core
+      cores = used_core,
+      test_top_100 = FALSE
       # progress_callback = progress_callback 
     )
     

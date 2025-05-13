@@ -7,9 +7,21 @@ DROMA-DB is a comprehensive database and analysis tool that integrates the large
 
 ![image](https://github.com/user-attachments/assets/89b385e0-f5e4-4d8e-a33b-5f30bed039b2)
 
-deng1-3 are our in house pdo data, others are all cancer cell line data.
 
-<img src="http://cos01.mugpeng.top/img/20250310150259.png" style="zoom:50%;" />
+
+
+
+## Statistics Info
+
+Include 17 datasets now(11 cell line, 2 PDC, 3 PDO, 1 PDX), totally 2599 unique samples and 56398 unique drugs.
+
+![](https://raw.githubusercontent.com/mugpeng/mugpeng-my-gallery-02/main/img20250513115037.png)
+
+![](https://raw.githubusercontent.com/mugpeng/mugpeng-my-gallery-02/main/img20250513114926.png)
+
+
+
+
 
 
 
@@ -34,25 +46,6 @@ DROMA-DB offers a range of powerful features for cancer pharmacogenomics researc
 5. **Statistical Visualization**: View meta-analysis forest plots, volcano plots, and other visualizations to understand relationships.
 
 6. **Data Export**: Download results in various formats (PDF, CSV, R objects) for further analysis.
-
-
-
-## Statistics Information
-
-This section provides overview statistics about the database:
-
-- Drug and sample counts by source
-- Data type counts (cell lines vs PDO)
-- Molecular characteristics available in each dataset
-- Drug and sample overlap between datasets
-- Tumor type distribution
-
-![](http://cos01.mugpeng.top/img/20250310150835.png)
-
-A. Drug and sample distribution within the dataset. A total of 2,065 drugs and 1,815 samples are represented in the dataset, with cell lines (2,065 drugs) being more extensively tested than patient-derived organoids (PDO, 78 drugs tested). For type of resource, PRISM shows the highest number of drugs, while GDSC2 contains the most cell lines.
-B. Molecular characterization coverage across dataset types. Multiple omics data types, such as whole-exome sequencing, RNA-Seq, and proteomics, are available for different systems, with variation observed across DEG and PDO datasets. Gene fusion data are limited to specific subsets.
-C. Mechanisms of action (MOA) for drugs tested in the dataset. The dataset comprises diverse drug classes, encompassing EGFR inhibitors (69 drugs), VEGFR inhibitors (70 drugs), PI3K inhibitors (51 drugs), and CDK inhibitors (24 drugs), among others. Targeted therapies dominate the collection.
-D. Tumor type distribution across organ systems. Tumor systems represented include lung (1373), blood/lymphatic (1028 samples), gastrointestinal (669 samples), breast (513 samples), and other tumors. The sizes of the bubbles correlate with the number of samples per tumor system.
 
 
 
@@ -94,7 +87,7 @@ pacman::p_load(
 
 
 
-download the input data to `Input/`: [Input data for DROMA_DB](https://zenodo.org/records/15055906)
+download the input data to `Input/`: [Input data for DROMA_DB](https://zenodo.org/records/15392760)
 
 1. Clone the repository:
 
@@ -288,6 +281,38 @@ C. A popup window can remind user the completion of analysis.
 
 
 
+### 3. Drug Feature Analysis
+
+The DrugFeature module provides users with a comprehensive interface for exploring and analyzing drug sensitivity data across different biological samples in the DROMA database.
+
+Key capabilities of this module include:
+
+**Drug Selection**: Users can select specific drugs from a searchable dropdown menu to analyze their sensitivity patterns.
+
+**Data Filtering**: The interface allows filtering by data type (cell lines, PDCs, PDOs, PDXs) and tumor type, enabling focused exploration of specific cancer models.
+
+**Comparison Analysis**: Users can compare drug sensitivity across various biological attributes like tumor type, gender, ethnicity, or age, with visualizations automatically adapting to categorical or continuous variables.
+
+**Interactive Tables**: The module presents both raw and z-score normalized drug sensitivity data in interactive tables with built-in search, filter, and copy functions.
+
+**Data Annotation**: It integrates sample annotations with drug sensitivity data, allowing users to explore associations between drug response and sample characteristics.
+
+![](https://raw.githubusercontent.com/mugpeng/mugpeng-my-gallery-02/main/img20250513114407.png)
+
+**Visualization**: For continuous variables (like age), it generates scatter plots with trend lines and correlation statistics, while for categorical variables (like tumor type), it creates boxplots with statistical comparisons.
+
+![](https://raw.githubusercontent.com/mugpeng/mugpeng-my-gallery-02/main/img20250513113812.png)
+
+**Data Export**: Users can download the displayed data in multiple formats (RDS or CSV) for further analysis in other tools.
+
+
+
+
+
+
+
+
+
 ### Global settings
 
 On the left of screen there is a floating widget:
@@ -301,6 +326,18 @@ After clicking it, you could do some global settings:
 ![](https://raw.githubusercontent.com/mugpeng/mugpeng-my-gallery-02/main/img20250317193117.png)
 
 
+
+### Statistics Information
+
+- Drug and sample counts by source
+- Data type counts (cell lines, PDC, PDO, PDX)
+- Molecular characteristics available in each dataset
+- Drug and sample overlap between datasets
+- Tumor type distribution
+
+![](https://raw.githubusercontent.com/mugpeng/mugpeng-my-gallery-02/main/img20250513115037.png)
+
+Include 17 datasets now(11 cell line, 2 PDC, 3 PDO, 1 PDX), totally 2599 unique samples and 56398 unique drugs.
 
 ## Other description
 
@@ -364,6 +401,24 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 
 ## Milestone
+
+### 0513 v0.3
+
+Refactor App.R and Modules: Update version to 0.3.
+
+- add new datasets, now have in vivo data now(Xeva PDX dataset), totally include 17 datasets now(11 cell line, 2 PDC, 3 PDO, 1 PDX)
+
+![](https://raw.githubusercontent.com/mugpeng/mugpeng-my-gallery-02/main/img20250513115037.png)
+
+- add new module, and enhance drug feature analysis. 
+- Remove deprecated Rmd files and adjust data loading paths. 
+- Update BatchFeature and DrugOmicPair modules for improved functionality and user experience.
+- Functionize all functions in modules and put them under `Package_Function/` preparing for making DROMA R package.
+- fix some bugs.
+
+
+
+
 
 ### 0319
 

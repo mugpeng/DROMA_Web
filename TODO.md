@@ -29,6 +29,7 @@
   - try to see the performance of rank method
 - [ ] more detailed cellline data
   - [ ] [Cellosaurus cell line MDA-MB-361 (CVCL_0620)](https://www.cellosaurus.org/CVCL_0620)
+- [ ] [Integrating heterogeneous drug sensitivity data from cancer pharmacogenomic studies - PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC5239501/) calculate other matric
 
 
 

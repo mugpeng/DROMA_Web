@@ -2,7 +2,7 @@
 # 
 # @param select_feas_type The type of feature to select (e.g., "mRNA", "cnv", "drug")
 # @param select_feas The specific feature to select within the feature type
-# @param data_type Filter by data type: "all" (default), "cell" (cell lines only), or "PDO" (patient-derived organoids only)
+# @param data_type Filter by data type: "all" (default), "cell" (cell lines only), or "PDO" (patient-derived organoids only), or "PDC" and "PDX"
 # @param tumor_type Filter by tumor type: "all" (default) or any specific tumor type (e.g., "lung cancer", "breast cancer")
 # @return A list of selected features filtered by the specified data type and tumor type
 selFeatures <- function(select_feas_type, select_feas, 
@@ -10,14 +10,14 @@ selFeatures <- function(select_feas_type, select_feas,
   if(!select_feas_type %in% c("mRNA","cnv",
                                "meth", "proteinrppa", "proteinms", # continuous
                                "mutation_gene", "mutation_site", "fusion", # discrete
-                               "drug"
+                               "drug", "drug_raw"
   )){
     stop("The select feature type doesn't exsit. Please choose from drug, mRNA, meth, cnv, proteinms, proteinrppa, \nmutation_gene, mutation_site, or fusion.")
   }
   
   # Validate data_type parameter
-  if(!data_type %in% c("all", "cell", "PDO")) {
-    stop("Invalid data_type. Please choose from 'all', 'cell', or 'PDO'.")
+  if(!data_type %in% c("all", "CellLine", "PDO", "PDC", "PDX")) {
+    stop("Invalid data_type. Please choose from 'all', 'CellLine', or 'PDO', or 'PDC', or 'PDX'.")
   }
   
   # Get cells based on data_type and tumor_type filter
@@ -63,7 +63,7 @@ selFeatures <- function(select_feas_type, select_feas,
   feas_sel_vec <- fea_list[[select_feas_type]]
   if(select_feas_type %in% c("mRNA","cnv",
                               "meth", "proteinrppa", "proteinms",
-                              "drug")){
+                              "drug", "drug_raw")){
     fea_sel_list <- lapply(feas_sel_vec, function(x){
       # x = feas_sel_vec[1]
       fea <- as.data.frame(base::get(paste0(x, "_", select_feas_type)))
@@ -108,7 +108,7 @@ selFeatures <- function(select_feas_type, select_feas,
   fea_sel_list <- fea_sel_list[!sapply(fea_sel_list, is.null)]
   if(length(fea_sel_list) < 1){
     if(data_type == "all" && tumor_type == "all") {
-      stop("The select feature doesn't exsit, check if it is in your selected feature types. \nsuch as, 'YM-155' for 'drug'.")
+      stop("The select feature doesn't exist, check if it is in your selected feature types. \nsuch as, 'YM-155' for 'drug'.")
     } else {
       # Construct appropriate error message
       filter_msg <- ""
@@ -125,3 +125,17 @@ selFeatures <- function(select_feas_type, select_feas,
   fea_sel_list
 }
 
+mergeDrugFeatures <- function(myDrugs){
+  my_drugs <- unname(myDrugs)
+  merge_drug <- unlist(lapply(my_drugs, function(x) x))
+  merge_drug <- na.omit(merge_drug)
+  merge_drug
+}
+
+annoMergeFeatures <- function(mergeDrug){
+  merge_drug <- data.frame(
+    SampleID = names(mergeDrug),
+    value = unname(mergeDrug)
+  )
+  merge_drug <- base::merge(merge_drug, sample_anno, by = "SampleID")
+}
