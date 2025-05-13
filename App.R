@@ -26,6 +26,8 @@ library(treemapify)
 library(gridExtra)
 library(grid)
 library(patchwork)
+library(cowplot)
+library(gg.gap)
 
 # Multithreads
 library(snowfall)
@@ -40,13 +42,22 @@ config_list <- config::get(
   # Default is test mode
 )
 
+## Function----
+source("Package_Function/FuncGetData.R")
+source("Package_Function/FuncDrugOmicPair.R")
+source("Package_Function/FuncBatchFeature.R")
+source("Package_Function/FuncZscoreWhole.R")
+source("Package_Function/FuncPlot.R")
+source("Package_Function/FuncDrugFeature.R")
+source("Package_Function/FuncMisc.R")
+
 ## Load Data and Preprocess ----
 source("Modules/LoadData.R")
 source("Modules/Preprocess.R")
 
 # Welcome notification
 str1 <- "Nice to meet you."
-str2 <- "Very welcome to my version(0.2) —25/03/14"
+str2 <- "Very welcome to my version(0.3) —25/05/13"
 str3 <- "You can visit https://github.com/mugpeng/DROMA_DB to reach the toturial."
 modal_notification <- modalDialog(
   # p("Nice to meet you. \n, test"),
@@ -57,16 +68,10 @@ modal_notification <- modalDialog(
   )
 )
 
-## Function----
-source("Package_Function/FuncGetData.R")
-source("Package_Function/FuncDrugOmicPair.R")
-source("Package_Function/FuncBatchFeature.R")
-source("Package_Function/FuncZscoreWhole.R")
-source("Package_Function/FuncPlot.R")
-
 ## Modules----
 source("Modules/DrugOmicPair.R")
 source("Modules/BatchFeature.R")
+source("Modules/DrugFeature.R")
 source("Modules/StatAnno.R")
 source("Modules/GlobalSetting.R")
 
@@ -88,6 +93,10 @@ ui <- tagList(
              tabPanel("Batch Features Associations Analysis",
                       uiBatchFeature("BatchFeature")
              ),
+             ## Drug Feature Analysis ----
+             tabPanel("Drug Feature Analysis",
+                      uiDrugFeature("DrugFeature")
+             ),
              ## Statistics and Annotations ----
              tabPanel("Statistics and Annotations",
                       uiStatAnno("StatAnno")
@@ -104,7 +113,7 @@ ui <- tagList(
                       ))
   )
 )
-  
+
 # Server ----
 server <- function(input, output, session) {
   # Some setup ----
@@ -123,9 +132,11 @@ server <- function(input, output, session) {
   callModule(serverDrugOmicPair, "DrugOmicPair")
   # Features database significant analysis ----
   callModule(serverBatchFeature, "BatchFeature")
+  # Drug Feature Analysis ----
+  callModule(serverDrugFeature, "DrugFeature")
   # Statistics and Annotations ----
   callModule(serverStatAnno, "StatAnno")
 }
-  
+
 # Run ----
 shinyApp(ui = ui, server = server)

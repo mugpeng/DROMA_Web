@@ -72,15 +72,19 @@ apply_zscore_normalization <- function() {
   # mRNA datasets
   if (exists("ccle_mRNA", envir = .GlobalEnv)) assign("ccle_mRNA", zscore_normalize(base::get("ccle_mRNA", envir = .GlobalEnv)), envir = .GlobalEnv)
   if (exists("gdsc_mRNA", envir = .GlobalEnv)) assign("gdsc_mRNA", zscore_normalize(base::get("gdsc_mRNA", envir = .GlobalEnv)), envir = .GlobalEnv)
-  if (exists("deng1_mRNA", envir = .GlobalEnv)) assign("deng1_mRNA", zscore_normalize(base::get("deng1_mRNA", envir = .GlobalEnv)), envir = .GlobalEnv)
-  if (exists("deng2_mRNA", envir = .GlobalEnv)) assign("deng2_mRNA", zscore_normalize(base::get("deng2_mRNA", envir = .GlobalEnv)), envir = .GlobalEnv)
-  if (exists("deng3_mRNA", envir = .GlobalEnv)) assign("deng3_mRNA", zscore_normalize(base::get("deng3_mRNA", envir = .GlobalEnv)), envir = .GlobalEnv)
-
+  if (exists("NCI60_mRNA", envir = .GlobalEnv)) assign("NCI60_mRNA", zscore_normalize(base::get("NCI60_mRNA", envir = .GlobalEnv)), envir = .GlobalEnv)
+  if (exists("UMPDO1_mRNA", envir = .GlobalEnv)) assign("UMPDO1_mRNA", zscore_normalize(base::get("UMPDO1_mRNA", envir = .GlobalEnv)), envir = .GlobalEnv)
+  if (exists("UMPDO2_mRNA", envir = .GlobalEnv)) assign("UMPDO2_mRNA", zscore_normalize(base::get("UMPDO2_mRNA", envir = .GlobalEnv)), envir = .GlobalEnv)
+  if (exists("UMPDO3_mRNA", envir = .GlobalEnv)) assign("UMPDO3_mRNA", zscore_normalize(base::get("UMPDO3_mRNA", envir = .GlobalEnv)), envir = .GlobalEnv)
+  if (exists("tavor_mRNA", envir = .GlobalEnv)) assign("tavor_mRNA", zscore_normalize(base::get("tavor_mRNA", envir = .GlobalEnv)), envir = .GlobalEnv)
+  if (exists("Xeva_mRNA", envir = .GlobalEnv)) assign("Xeva_mRNA", zscore_normalize(base::get("Xeva_mRNA", envir = .GlobalEnv)), envir = .GlobalEnv)
+  
   # CNV datasets
   if (exists("ccle_cnv", envir = .GlobalEnv)) assign("ccle_cnv", zscore_normalize(base::get("ccle_cnv", envir = .GlobalEnv)), envir = .GlobalEnv)
   if (exists("gdsc_cnv", envir = .GlobalEnv)) assign("gdsc_cnv", zscore_normalize(base::get("gdsc_cnv", envir = .GlobalEnv)), envir = .GlobalEnv)
   if (exists("gCSI_cnv", envir = .GlobalEnv)) assign("gCSI_cnv", zscore_normalize(base::get("gCSI_cnv", envir = .GlobalEnv)), envir = .GlobalEnv)
-
+  if (exists("Xeva_cnv", envir = .GlobalEnv)) assign("Xeva_cnv", zscore_normalize(base::get("Xeva_cnv", envir = .GlobalEnv)), envir = .GlobalEnv)
+  
   # Methylation dataset
   if (exists("ccle_meth", envir = .GlobalEnv)) assign("ccle_meth", zscore_normalize(base::get("ccle_meth", envir = .GlobalEnv)), envir = .GlobalEnv)
 
@@ -88,15 +92,28 @@ apply_zscore_normalization <- function() {
   if (exists("ccle_proteinms", envir = .GlobalEnv)) assign("ccle_proteinms", zscore_normalize(base::get("ccle_proteinms", envir = .GlobalEnv)), envir = .GlobalEnv)
   if (exists("ccle_proteinrppa", envir = .GlobalEnv)) assign("ccle_proteinrppa", zscore_normalize(base::get("ccle_proteinrppa", envir = .GlobalEnv)), envir = .GlobalEnv)
 
+  # Drug datasets
+  # PDC
+  if (exists("tavor_drug", envir = .GlobalEnv)) assign("tavor_drug", zscore_normalize_drug(base::get("tavor_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
+  if (exists("PDTXBreast_drug", envir = .GlobalEnv)) assign("PDTXBreast_drug", zscore_normalize_drug(base::get("PDTXBreast_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
+  # CellLine
+  if (exists("ccle_drug", envir = .GlobalEnv)) assign("ccle_drug", zscore_normalize_drug(base::get("ccle_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
   if (exists("ctrp1_drug", envir = .GlobalEnv)) assign("ctrp1_drug", zscore_normalize_drug(base::get("ctrp1_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
   if (exists("ctrp2_drug", envir = .GlobalEnv)) assign("ctrp2_drug", zscore_normalize_drug(base::get("ctrp2_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
-  if (exists("prism_drug", envir = .GlobalEnv)) assign("prism_drug", zscore_normalize_drug(base::get("prism_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
   if (exists("gdsc1_drug", envir = .GlobalEnv)) assign("gdsc1_drug", zscore_normalize_drug(base::get("gdsc1_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
   if (exists("gdsc2_drug", envir = .GlobalEnv)) assign("gdsc2_drug", zscore_normalize_drug(base::get("gdsc2_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
   if (exists("gCSI_drug", envir = .GlobalEnv)) assign("gCSI_drug", zscore_normalize_drug(base::get("gCSI_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
-  if (exists("deng1_drug", envir = .GlobalEnv)) assign("deng1_drug", zscore_normalize_drug(base::get("deng1_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
-  if (exists("deng2_drug", envir = .GlobalEnv)) assign("deng2_drug", zscore_normalize_drug(base::get("deng2_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
-  if (exists("deng3_drug", envir = .GlobalEnv)) assign("deng3_drug", zscore_normalize_drug(base::get("deng3_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
+  if (exists("prism_drug", envir = .GlobalEnv)) assign("prism_drug", zscore_normalize_drug(base::get("prism_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
+  if (exists("FIMM_drug", envir = .GlobalEnv)) assign("FIMM_drug", zscore_normalize_drug(base::get("FIMM_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
+  if (exists("UHNBreast_drug", envir = .GlobalEnv)) assign("UHNBreast_drug", zscore_normalize_drug(base::get("UHNBreast_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
+  if (exists("GRAY_drug", envir = .GlobalEnv)) assign("GRAY_drug", zscore_normalize_drug(base::get("GRAY_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
+  if (exists("NCI60_drug", envir = .GlobalEnv)) assign("NCI60_drug", zscore_normalize_drug(base::get("NCI60_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
+  # PDO
+  if (exists("UMPDO1_drug", envir = .GlobalEnv)) assign("UMPDO1_drug", zscore_normalize_drug(base::get("UMPDO1_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
+  if (exists("UMPDO2_drug", envir = .GlobalEnv)) assign("UMPDO2_drug", zscore_normalize_drug(base::get("UMPDO2_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
+  if (exists("UMPDO3_drug", envir = .GlobalEnv)) assign("UMPDO3_drug", zscore_normalize_drug(base::get("UMPDO3_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
+  # PDX
+  if (exists("Xeva_drug", envir = .GlobalEnv)) assign("Xeva_drug", zscore_normalize_drug(base::get("Xeva_drug", envir = .GlobalEnv)), envir = .GlobalEnv)
   
   # Set normalization state
   assign("normalization_state", TRUE, envir = .GlobalEnv)

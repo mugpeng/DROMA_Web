@@ -9,7 +9,7 @@ tmp <- list()
 
 # Select mini test/development data 
 ```{r}
-load(file = "Input/01/exp.Rda")
+load(file = "Input/01/mRNA.Rda")
 load(file = "Input/01/cnv.Rda")
 load(file = "Input/01/meth.Rda")
 load(file = "Input/01/protein.Rda")
@@ -17,24 +17,25 @@ load(file = "Input/01/protein.Rda")
 
 Extract these three omics:
 ```{r}
-vars <- ls()[!ls() %in% c("my_packages", "tmp", "vars", "i")]
+vars <- ls()[!ls() %in% c("my_packages", "tmp", "vars", "i", "config_list")]
 for(i in vars){
   tmp$a <- base::get(i)
   assign(i, tmp$a[1:100,])
 }
 ```
 
-
 # Save
 ```{r}
-# exp
 save(
   ccle_mRNA,
   gdsc_mRNA,
-  deng1_mRNA,
-  deng2_mRNA,
-  deng3_mRNA,
-  file = "Input/03/exp.Rda"
+  NCI60_mRNA,
+  tavor_mRNA,
+  UMPDO1_mRNA,
+  UMPDO2_mRNA,
+  UMPDO3_mRNA,
+  Xeva_mRNA,
+  file = "Input/04/mRNA.Rda"
 )
 
 # cnv
@@ -42,19 +43,20 @@ save(
   ccle_cnv,
   gdsc_cnv,
   gCSI_cnv,
-  file = "Input/03/cnv.Rda"
+  Xeva_cnv,
+  file = "Input/04/cnv.Rda"
+)
+
+# protein
+save(
+  ccle_proteinms,
+  ccle_proteinrppa,
+  file = "Input/04/protein.Rda"
 )
 
 # meth
 save(
   ccle_meth,
-  file = "Input/03/meth.Rda"
-)
-
-# Protein
-save(
-  ccle_proteinms,
-  ccle_proteinrppa,
-  file = "Input/03/protein.Rda"
+  file = "Input/04/meth.Rda"
 )
 ```

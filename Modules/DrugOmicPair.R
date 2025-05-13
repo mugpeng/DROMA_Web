@@ -42,7 +42,9 @@ uiDrugOmicPair <- function(id){
                          "Filter by data type:", 
                          choices = c("All" = "all",
                                      "Cell Lines" = "cell",
-                                     "Patient-Derived Organoids" = "PDO"
+                                     "Patient-Derived Cells" = "PDC",
+                                     "Patient-Derived Organoids" = "PDO",
+                                     "Patient-Derived Xenografts" = "PDX"
                          ), selected = "all"
              )),
       column(6,
@@ -165,58 +167,33 @@ serverDrugOmicPair <- function(input, output, session){
                        selected = "Sepantronium bromide"
   )
   
-  # Produce plot ----
-  # Select drug and omic
-  selected_drug <- reactive({
-    # React to z-score changes
-    zscore_tracker()
-    
-    shiny::validate(
-      shiny::need(input$select_specific_drug != "", "You are not chosen drug yet.")
-    )
-    selFeatures("drug", input$select_specific_drug, 
-                data_type = input$data_type, 
-                tumor_type = input$tumor_type)
-  })
-  
-  selected_omic <- reactive({
-    # React to z-score changes
-    zscore_tracker()
-    
-    shiny::validate(
-      shiny::need(input$select_specific_omic != "", "You are not chosen omic yet.")
-    )
-    selFeatures(input$select_omics, input$select_specific_omic,
-                data_type = input$data_type,
-                tumor_type = input$tumor_type) 
-  })
-  
   # Calculate pair result and plot
   selected_obj <- reactive({
     # React to z-score changes
     zscore_tracker()
     
+    # Check if drug is selected
+    shiny::validate(
+      shiny::need(input$select_specific_drug != "", "Please select a drug.")
+    )
+
+    # Check if omic is selected
+    shiny::validate(
+      shiny::need(input$select_specific_omic != "", "You are not chosen omic yet.")
+    )
+
     # Check if z-score normalization is enabled
     merged_enabled <- FALSE
     if(exists("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)) {
       merged_enabled <- isTRUE(base::get("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)$enabled)
     }
     
-    if (input$select_omics %in% c("mRNA", "meth", "cnv",
-                                  "proteinrppa", "proteinms")) {
-      selected_pair <- pairDrugOmic(selected_omic(), selected_drug(), merged = merged_enabled)
-      re <- plotDrugOmicPair_con(selected_pair)    
-    } else{
-      selected_pair <- pairDrugOmic2(selected_omic(), selected_drug(), merged = merged_enabled)
-      re <- plotDrugOmicPair_dis(selected_pair)     
-    }
-    if(length(re)>1){
-      return(
-        list(plot = re[[1]], meta = re[[2]], data = selected_pair)
-      )
-    } else {
-      return(list(plot = re[[1]], data = selected_pair))
-    }
+    # Use the oneDrugOmicPair function which now uses our refactored functions internally
+    oneDrugOmicPair(input$select_omics, input$select_specific_omic,
+                   input$select_specific_drug,
+                   data_type = input$data_type, 
+                   tumor_type = input$tumor_type,
+                   merged_enabled = merged_enabled)
   })
   
   output$patchPlot <- renderPlot({
@@ -229,25 +206,7 @@ serverDrugOmicPair <- function(input, output, session){
   
   output$metaPlot <- renderPlot({
     req(selected_obj()$meta)  
-    p_val <- selected_obj()$meta$pval.random
-    p_text <- if(p_val < 0.001) {
-      paste("Random-Effects Model (p =", format(p_val, scientific = TRUE, digits = 3), ")")
-    } else {
-      paste("Random-Effects Model (p =", round(p_val, 3), ")")
-    }
-    meta::forest(selected_obj()$meta, 
-                 xlab = "Effect Size (95% CI)", 
-                 slab = "study", 
-                 print.pval.common = T,
-                 boxsize = 0.2, 
-                 lineheight = "auto",
-                 print.pval.Q=FALSE,
-                 print.I2 = F,
-                 # resid.hetstat = F,
-                 print.tau2	= F,
-                 common = FALSE,
-                 text.random = p_text
-    )
+    create_forest_plot(selected_obj()$meta)
   })
   
   # Add download handler
@@ -282,26 +241,8 @@ serverDrugOmicPair <- function(input, output, session){
                saveRDS(selected_obj()$data, filename)
              },
              "meta" = {
-               p_val <- selected_obj()$meta$pval.random
-               p_text <- if(p_val < 0.001) {
-                 paste("Random-Effects Model (p =", format(p_val, scientific = TRUE, digits = 3), ")")
-               } else {
-                 paste("Random-Effects Model (p =", round(p_val, 3), ")")
-               }
                pdf(file = filename, width = 10, height = 6)
-               meta::forest(selected_obj()$meta, 
-                            xlab = "Effect Size (95% CI)", 
-                            slab = "study", 
-                            print.pval.common = T,
-                            boxsize = 0.2, 
-                            lineheight = "auto",
-                            print.pval.Q=FALSE,
-                            print.I2 = F,
-                            # resid.hetstat = F,
-                            print.tau2	= F,
-                            common = FALSE,
-                            text.random = p_text
-               )
+               create_forest_plot(selected_obj()$meta)
                dev.off()
              }
       )

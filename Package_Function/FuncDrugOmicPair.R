@@ -20,7 +20,7 @@ pairDrugOmic <- function(myOmics, myDrugs, merged = FALSE){
   })
   pair_list2 <- unlist(pair_list2, recursive = F)
   pair_list2 <- pair_list2[!sapply(pair_list2, is.null)]
-  
+  if(length(pair_list2) < 1) {stop("Please try to another drug-omic pair. This pair do not have result.")}
   # If merged is TRUE and z-score normalization is enabled, create a merged dataset
   if(merged) {
     # Create a merged dataset by combining all pairs using the more efficient approach
@@ -36,93 +36,69 @@ pairDrugOmic <- function(myOmics, myDrugs, merged = FALSE){
       "drug" = combined_list[[2]]
     )
   }
-  
-  if(length(pair_list2) < 1) {stop("Please try to another drug-omic pair. This pair do not have result.")}
   pair_list2
 }
 
-# Function to plot paired omics and drug data (continuous)
-plotDrugOmicPair_con <- function(myPairs, meta = T){
-  p_list <- list()
-  cor_list <- list()
-  for(x in 1:length(myPairs)){
-    # Try to perform correlation test and plotting
+# Perform meta-analysis on continuous drug-omic pairs
+analyze_continuous_drugomic <- function(myPairs) {
+  # Initialize list to store correlation results
+  test_list <- list()
+  valid_indices <- c()
+  
+  # Analyze each pair
+  for (x in seq_along(myPairs)) {
+    # Skip merged dataset for meta-analysis
+    if (names(myPairs)[x] == "merged_dataset") next
+    
+    # Try to perform correlation test
     tryCatch({
-      omic_sel <- myPairs[[x]][[1]]
-      drug_sel <- myPairs[[x]][[2]]
+      omic_sel <- myPairs[[x]]$omic
+      drug_sel <- myPairs[[x]]$drug
       
       # Check for valid data
-      if(length(omic_sel) < 3 || length(drug_sel) < 3 ) next
+      if (length(omic_sel) < 3 || length(drug_sel) < 3) next
       
-      cor_df <- data.frame(
-        genes = omic_sel,
-        drugs = drug_sel
+      # Perform correlation test
+      cor_re <- cor.test(omic_sel, drug_sel, method = "pearson")
+      test_list[[x]] <- data.frame(
+        p = cor_re$p.value,
+        effect = cor_re$estimate,
+        N = length(omic_sel)
       )
-      
-      # Create plot
-      current_plot <- ggscatter(cor_df, x = "genes", y = "drugs",
-                                alpha = 0.2) +
-        stat_cor(size = 6, method = "spearman") + 
-        stat_smooth(formula = y ~ x, method = "lm") + 
-        theme_bw() +
-        theme(
-          axis.title = element_blank(),
-          title = element_text(size = 15, face = "bold"),
-          axis.text = element_text(size = 12)
-        ) + 
-        ggtitle(names(myPairs)[x])
-      
-      p_list[[x]] <- current_plot
-      
-      # Perform correlation test if meta-analysis is requested
-      # Skip meta-analysis for merged dataset
-      if(meta == T && names(myPairs)[x] != "merged_dataset"){
-        cor_re <- cor.test(omic_sel, drug_sel, method = "pearson")
-        cor_list[[x]] <- data.frame(
-          p = cor_re$p.value,
-          effect = cor_re$estimate,
-          N = length(omic_sel)
-        )
-      }
+      # Track valid indices for proper study name mapping
+      valid_indices <- c(valid_indices, x)
     }, error = function(e) {
+      # Continue to next pair on error
     })
   }
-  # Remove NULL entries from lists
-  p_list <- p_list[!sapply(p_list, is.null)]
-  # Prepare return list
-  re <- list()
   
-  # Only create plot if we have valid plots
-  if(length(p_list) > 0) {
-    re[[1]] <- wrap_plots(p_list, ncol = 3)
-  } else {
-    re[[1]] <- NULL
-  }
+  # Return NULL if no correlations could be calculated
+  if (length(test_list) < 1) return(NULL)
   
-  # Perform meta-analysis only if we have correlation results
-  if(meta == T && length(cor_list) > 1) {
-    tryCatch({
-      cal_re <- do.call(rbind, cor_list)
-      cal_re$study <- names(myPairs)[!names(myPairs) %in% "merged_dataset"][!sapply(cor_list, is.null)]
-      cal_re$se <- sqrt((1 - cal_re$effect^2) / (cal_re$N - 2))
-      cal_re$z <- 0.5 * log((1 + cal_re$effect) / (1 - cal_re$effect))  # Fisher's z 
-      cal_re$se_z <- 1 / sqrt(cal_re$N - 3)         
-      
+  # Prepare data for meta-analysis
+  meta_df <- do.call(rbind, test_list)
+  # Use valid_indices to correctly map study names
+  meta_df$study <- names(myPairs)[valid_indices]
+  meta_df$se <- sqrt((1 - meta_df$effect^2) / (meta_df$N - 2))
+  meta_df$z <- 0.5 * log((1 + meta_df$effect) / (1 - meta_df$effect))  # Fisher's z 
+  meta_df$se_z <- 1 / sqrt(meta_df$N - 3)         
+  
+  # Perform meta-analysis
+  tryCatch({
+    # Only perform meta-analysis if we have at least 2 studies
+    if (nrow(meta_df) >= 2) {
       cal_meta_re <- metagen(TE = z, 
                              seTE = se_z, 
-                             data = cal_re, 
+                             data = meta_df, 
                              sm = "Z",
                              studlab = study)
-      re[[2]] <- cal_meta_re
-    }, error = function(e) {
-      # message("Meta-analysis failed: ", as.character(e))
-      re[[2]] <- NULL
-    })
-  } else {
-    re[[2]] <- NULL
-  }
-  if(length(re) < 1) {stop("Please try to another drug-omic pair. This pair do not have result.")}
-  return(re)
+      return(cal_meta_re)
+    } else {
+      return(NULL)
+    }
+  }, error = function(e) {
+    return(NULL)
+  })
 }
 
 # Discrete ----
@@ -146,7 +122,7 @@ pairDrugOmic2 <- function(myOmics, myDrugs, merged = FALSE){
   })
   pair_list2 <- unlist(pair_list2, recursive = F)
   pair_list2 <- pair_list2[!sapply(pair_list2, is.null)]
-  
+  if(length(pair_list2) < 1){stop("Please try to another drug-omic pair. This pair do not have result.")}
   # If merged is TRUE and z-score normalization is enabled, create a merged dataset
   if(merged) {
     # Create a merged dataset by combining all pairs using the more efficient approach
@@ -164,132 +140,135 @@ pairDrugOmic2 <- function(myOmics, myDrugs, merged = FALSE){
       "no" = combined_list[[2]]
     )
   }
-  
-  if(length(pair_list2) < 1){stop("Please try to another drug-omic pair. This pair do not have result.")}
   pair_list2
 }
 
-# Function to plot paired omics and drug data (discrete)
-plotDrugOmicPair_dis <- function(myPairs, meta = T){
-  p_list <- list()
+# Perform meta-analysis on discrete drug-omic pairs
+analyze_discrete_drugomic <- function(myPairs) {
+  # Initialize list to store test results
   test_list <- list()
-  
-  for(x in 1:length(myPairs)){
-    # Try to perform wilcoxon test and plotting
+  valid_indices <- c()
+
+  # Analyze each pair
+  for (x in seq_along(myPairs)) {
+    # Skip merged dataset for meta-analysis
+    if (names(myPairs)[x] == "merged_dataset") next
+    
+    # Try to perform Wilcoxon test and effect size calculation
     tryCatch({
-      yes_drugs <- myPairs[[x]][[1]]
-      no_drugs <- myPairs[[x]][[2]]
+      yes_drugs <- myPairs[[x]]$yes
+      no_drugs <- myPairs[[x]]$no
       
       # Check for valid data
-      if(length(yes_drugs) < 3 || length(no_drugs) < 3) next
+      if (length(yes_drugs) < 3 || length(no_drugs) < 3) next
       
-      box_df <- data.frame(
-        drugs = c(no_drugs, yes_drugs),
-        events = rep(c("no","yes"), times = c(length(no_drugs), length(yes_drugs))))
+      # Perform statistical test
+      wilcox_test <- wilcox.test(no_drugs, yes_drugs)
+      cliff_delta <- cliff.delta(no_drugs, yes_drugs)
       
-      # Create plot
-      current_plot <- ggboxplot(data = box_df, x = "events", y = "drugs",
-                                fill = "events", palette = c("#BEBADAFF", "#FB8072FF"),
-                                add = "jitter", add.params = list(alpha = 0.15)) + 
-        stat_compare_means(size = 6, label.x = 0.8,
-                           label.y = (max(box_df$drugs) - max(box_df$drugs)/8),
-                           label = "p.format") + 
-        theme_bw() + 
-        theme(
-          axis.title = element_blank(),
-          title = element_text(size = 15, face = "bold"),
-          axis.text = element_text(size = 12),
-          legend.position = "none"
-        ) + 
-        coord_cartesian(ylim = c(0, max(box_df$drugs) + 
-                                   max(box_df$drugs)/20)) + 
-        ggtitle(names(myPairs)[x])
-      
-      p_list[[x]] <- current_plot
-      
-      # Calculate effect size and other statistics for meta-analysis
-      # Skip meta-analysis for merged dataset
-      if(meta == T && names(myPairs)[x] != "merged_dataset"){
-        wilcox_test <- wilcox.test(no_drugs, yes_drugs)
-        cliff_delta <- cliff.delta(no_drugs, yes_drugs)
-        
-        test_list[[x]] <- data.frame(
-          p = wilcox_test$p.value,
-          effect = cliff_delta$estimate,
-          N = length(yes_drugs) + length(no_drugs),
-          n1 = length(yes_drugs),
-          n2 = length(no_drugs)
-        )
-      }
+      # Store results
+      test_list[[x]] <- data.frame(
+        p = wilcox_test$p.value,
+        effect = cliff_delta$estimate,
+        N = length(yes_drugs) + length(no_drugs),
+        n1 = length(yes_drugs),
+        n2 = length(no_drugs)
+      )
+      valid_indices <- c(valid_indices, x)
     }, error = function(e) {
+      # Continue to next pair on error
     })
   }
   
-  # Remove NULL entries from lists
-  p_list <- p_list[!sapply(p_list, is.null)]
+  # Return NULL if no tests could be performed
+  if (length(test_list) < 1) return(NULL)
   
-  # Prepare return list
-  re <- list()
+  # Prepare data for meta-analysis
+  meta_df <- do.call(rbind, test_list)
+  meta_df$study <- names(myPairs)[valid_indices]
   
-  # Only create plot if we have valid plots
-  if(length(p_list) > 0) {
-    re[[1]] <- wrap_plots(p_list, ncol = 3)
-  } else {
-    re[[1]] <- NULL
-  }
+  # Calculate standard error for Cliff's Delta
+  meta_df$se <- sqrt((1 - meta_df$effect^2) * (meta_df$n1 + meta_df$n2 + 1) / 
+                       (12 * meta_df$n1 * meta_df$n2))
   
-  # Perform meta-analysis only if we have test results
-  if(meta == T && length(test_list) > 1) {
-    tryCatch({
-      # Combine all test results
-      meta_df <- do.call(rbind, test_list)
-      meta_df$study <- names(myPairs)[!names(myPairs) %in% "merged_dataset"][!sapply(test_list, is.null)]
-      
-      # Calculate standard error for Cliff's Delta
-      meta_df$se <- sqrt((1 - meta_df$effect^2) * (meta_df$n1 + meta_df$n2 + 1) / 
-                           (12 * meta_df$n1 * meta_df$n2))
-      
-      # Perform meta-analysis
+  # Perform meta-analysis
+  tryCatch({
+    # Only perform meta-analysis if we have at least 2 studies
+    if (nrow(meta_df) >= 2) {
       meta_result <- metagen(TE = effect, 
                              seTE = se, 
                              data = meta_df,
                              sm = "CMD",  # Custom Mean Difference (using Cliff's Delta)
                              studlab = study)
-      
-      re[[2]] <- meta_result
-    }, error = function(e) {
-      re[[2]] <- NULL
-    })
-  } else {
-    re[[2]] <- NULL
-  }
-  if(length(re) < 1) {stop("Please try to another drug-omic pair. This pair do not have result.")}
-  return(re)
+      return(meta_result)
+    } else {
+      return(NULL)
+    }
+  }, error = function(e) {
+    return(NULL)
+  })
 }
 
 # All ----
 # Function to handle both continuous and discrete omics data in 
 # one function
 oneDrugOmicPair <- function(select_omics_type, select_omics,
-                            select_drugs){
-  myDrugs <- selDrugs(select_drugs)
+                            select_drugs,
+                            data_type = "all", tumor_type = "all",
+                            merged_enabled = TRUE,
+                            meta_enabled = TRUE){
+  # Get drug data
+  myDrugs <- selFeatures("drug", select_drugs, 
+                        data_type = data_type, 
+                        tumor_type = tumor_type)
+  myOmics <- selFeatures(select_omics_type, select_omics,
+                         data_type = data_type, 
+                         tumor_type = tumor_type)
+  # Initialize result list
+  result <- list()
   
-  # Check if z-score normalization is enabled
-  merged_enabled <- FALSE
-  if(exists("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)) {
-    merged_enabled <- isTRUE(get("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)$enabled)
-  }
-  
-  if(select_omics_type %in% c("exp", "meth", "proteinrppa", "cnv",
-                              "proteinms")){
-    myOmics <- selOmics(select_omics_type, select_omics)
+  # Handle continuous omics data
+  if(select_omics_type %in% c("mRNA", "meth", "proteinrppa", "cnv", "proteinms")){
+    # Pair data
     myPairs <- pairDrugOmic(myOmics, myDrugs, merged = merged_enabled)
-    p <- plotDrugOmicPair_con(myPairs)
-  } else{
-    myOmics <- selOmics2(select_omics_type, select_omics)
+    
+    # Create plots
+    result$plot <- plot_all_continuous_drugomic(myPairs)
+    
+    # Perform meta-analysis
+    if(meta_enabled){
+      meta_result <- analyze_continuous_drugomic(myPairs)
+      if (!is.null(meta_result)) {
+        result$meta <- meta_result
+      }
+    }
+    
+    # Store data
+    result$data <- myPairs
+  } else {
+    # Pair data
     myPairs <- pairDrugOmic2(myOmics, myDrugs, merged = merged_enabled)
-    p <- plotDrugOmicPair_dis(myPairs)
+    
+    # Create plots
+    result$plot <- plot_all_discrete_drugomic(myPairs)
+    
+    # Perform meta-analysis
+    if(meta_enabled){
+      meta_result <- analyze_discrete_drugomic(myPairs)
+      if (!is.null(meta_result)) {
+        result$meta <- meta_result
+      }
+    }
+    
+    # Store data
+    result$data <- myPairs
   }
-  return(p)
+  
+  # Return results if there's a plot
+  if (is.null(result$plot)) {
+    return(list())
+  } else {
+    return(result)
+  }
 }
 
