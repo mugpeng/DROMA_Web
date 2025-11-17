@@ -225,30 +225,30 @@ tmp$cells_search_proteinms <- data.frame(
 
 # For mutation gene data
 tmp$cells_search_mutgenes <- data.frame(
-  cells = c(ccle_mutation_gene$cells,
-            gdsc_mutation_gene$cells,
-            gCSI_mutation_gene$cells,
-            Xeva_mutation_gene$cells),  # Added Xeva_mutation_gene
-  datasets = c(rep("ccle", length(ccle_mutation_gene$cells)),
-               rep("gdsc", length(gdsc_mutation_gene$cells)),
-               rep("gCSI", length(gCSI_mutation_gene$cells)),
-               rep("Xeva", length(Xeva_mutation_gene$cells))),  # Added Xeva_mutation_gene
+  samples = c(ccle_mutation_gene$samples,
+            gdsc_mutation_gene$samples,
+            gCSI_mutation_gene$samples,
+            Xeva_mutation_gene$samples),  # Added Xeva_mutation_gene
+  datasets = c(rep("ccle", length(ccle_mutation_gene$samples)),
+               rep("gdsc", length(gdsc_mutation_gene$samples)),
+               rep("gCSI", length(gCSI_mutation_gene$samples)),
+               rep("Xeva", length(Xeva_mutation_gene$samples))),  # Added Xeva_mutation_gene
   type = "mutation_gene"
 ) %>% unique()
 
 # For mutation site data
 tmp$cells_search_mutsites <- data.frame(
-  cells = c(ccle_mutation_site$cells,
-            gdsc_mutation_site$cells),
-  datasets = c(rep("ccle", length(ccle_mutation_site$cells)),
-               rep("gdsc", length(gdsc_mutation_site$cells))),
+  samples = c(ccle_mutation_site$samples,
+            gdsc_mutation_site$samples),
+  datasets = c(rep("ccle", length(ccle_mutation_site$samples)),
+               rep("gdsc", length(gdsc_mutation_site$samples))),
   type = "mutation_site"
 ) %>% unique()
 
 # For fusion data
 tmp$cells_search_fusion <- data.frame(
-  cells = ccle_fusion$cells,
-  datasets = rep("ccle", length(ccle_fusion$cells)),
+  samples = ccle_fusion$samples,
+  datasets = rep("ccle", length(ccle_fusion$samples)),
   type = "fusion"
 ) %>% unique()
 
