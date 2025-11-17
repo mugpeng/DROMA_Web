@@ -1,3 +1,9 @@
+# Source required modules and functions
+source("Modules/DataAdapter.R")
+source("Functions/FeatureLoading.R")
+source("Functions/ZScoreNormalization.R")
+source("Functions/CommonFunctions.R")
+
 uiBatchFeature <- function(id){
   ns <- NS(id)
   fluidPage(
@@ -194,83 +200,90 @@ serverBatchFeature <- function(input, output, session){
   features_search_sel <- reactiveValues()
   
   observeEvent(input$select_features1, {
-    features_search_sel$features <- switch(input$select_features1,
-                                           "mRNA" = feas_search[feas_search$type %in% "mRNA",]$name,
-                                           "meth" = feas_search[feas_search$type %in% "meth",]$name,
-                                           "proteinrppa" = feas_search[feas_search$type %in% "proteinrppa",]$name,
-                                           "proteinms" = feas_search[feas_search$type %in% "proteinms",]$name,
-                                           "cnv" = feas_search[feas_search$type %in% "cnv",]$name,
-                                           "drug" = feas_search[feas_search$type %in% "drug",]$name,
-                                           "mutation_gene" = feas_search[feas_search$type %in% "mutation_gene",]$name,
-                                           "mutation_site" = feas_search[feas_search$type %in% "mutation_site",]$name,
-                                           "fusion" = feas_search[feas_search$type %in% "fusion",]$name)
-    
-    updateSelectizeInput(session = session, 
+    # Get available features from DROMA database
+    features <- getAvailableFeatures(input$select_features1)
+
+    features_search_sel$features <- features
+
+    updateSelectizeInput(session = session,
                          inputId = 'select_specific_feature',
-                         label = 'Features Selection:', 
-                         choices = features_search_sel$features, 
+                         label = 'Features Selection:',
+                         choices = features,
                          server = TRUE,
                          selected = "")
-  })
+  }, ignoreNULL = FALSE)
   
-  # Calculate results ----
+  # Calculate results using DROMA_R ----
   results <- reactive({
     # React to z-score changes
     zscore_tracker()
-    
+
     req(input$select_features1, input$select_features2, input$select_specific_feature)
-    
+
     # Show progress box
     shinyjs::show("progressBox")
     progress_vals$start_time <- Sys.time()
     progress_vals$features_done <- 0
-    
+
     # Simple progress indication
     updateProgressBar(session = session,
                       id = ns("progressBar"),
-                      value = 50,
-                      title = "Processing...")
-    
-    # Get total number of features to process
-    feas_search_sel <- feas_search[feas_search$type %in% input$select_features2,]
-    
+                      value = 10,
+                      title = "Initializing...")
+
+    # Convert filter parameters
+    data_type_filter <- if(input$data_type == "all") NULL else input$data_type
+    tumor_type_filter <- if(input$tumor_type == "all") NULL else input$tumor_type
+
+    # Get number of cores to use
     used_core <- ifelse(parallel::detectCores()/2 > 8, 8, parallel::detectCores()/2)
-    
-    results <- BatchFindSigFeaturesPlus(
+
+    # Use DROMA_R batch feature analysis
+    updateProgressBar(session = session,
+                      id = ns("progressBar"),
+                      value = 30,
+                      title = "Running analysis...")
+
+    results <- batchFindSignificantFeaturesWrapper(
       feature1_type = input$select_features1,
-      feature1_name = input$select_specific_feature,
       feature2_type = input$select_features2,
-      data_type = input$data_type,
-      tumor_type = input$tumor_type,
-      cores = used_core,
-      test_top_100 = FALSE
-      # progress_callback = progress_callback 
+      feature1_names = input$select_specific_feature,
+      feature2_names = NULL,  # Analyze all features of type2
+      data_type_filter = data_type_filter,
+      tumor_type_filter = tumor_type_filter,
+      cores = used_core
     )
-    
+
     # Update progress to complete
     updateProgressBar(session = session,
                       id = ns("progressBar"),
                       value = 100,
                       title = "Complete!")
-    
+
     # Hide progress box when done
     shinyjs::hide("progressBox")
-    
-    # Show completion message with actual number of completed features
-    if (!is.null(results)) {
+
+    # Show completion message
+    if (!is.null(results) && nrow(results) > 0) {
       sendSweetAlert(
         session = session,
         title = "Analysis Complete",
-        text = sprintf("Processed %d features in %s",
-                       nrow(feas_search_sel),  # Use actual number of results
-                       format_time(as.numeric(difftime(Sys.time(), 
-                                                       progress_vals$start_time, 
+        text = sprintf("Found %d significant associations in %s",
+                       nrow(results),
+                       format_time(as.numeric(difftime(Sys.time(),
+                                                       progress_vals$start_time,
                                                        units = "secs")))),
         type = "success"
       )
+    } else {
+      sendSweetAlert(
+        session = session,
+        title = "Analysis Complete",
+        text = "No significant associations found",
+        type = "info"
+      )
     }
-    # waiter_hide()
-    
+
     results
   })
   
@@ -279,16 +292,45 @@ serverBatchFeature <- function(input, output, session){
     progress_vals$estimated_time
   })
   
-  # Render volcano plot ----
+  # Render volcano plot using DROMA_R ----
   p_volcano <- reactive({
     req(results())
-    plotMetaVolcano(results(),
-                    es_t = 0.2,
-                    P_t = 0.001,
-                    label = TRUE,
-                    top_label_each = 5,
-                    title = paste(input$select_features1, input$select_specific_feature,
-                                  "vs", input$select_features2))
+
+    # Use DROMA_R plotMetaVolcano function if available
+    # For now, create a basic volcano plot
+    if (nrow(results()) > 0) {
+      tryCatch({
+        # Try to use DROMA_R's volcano plot function
+        DROMA.R::plotMetaVolcano(
+          results(),
+          es_t = 0.2,
+          P_t = 0.001,
+          label = TRUE,
+          top_label_each = 5,
+          title = paste(input$select_features1, input$select_specific_feature,
+                        "vs", input$select_features2)
+        )
+      }, error = function(e) {
+        # Fallback to basic ggplot if DROMA_R function not available
+        library(ggplot2)
+        df <- results()
+        ggplot(df, aes(x = effect_size, y = -log10(p_value))) +
+          geom_point(alpha = 0.5) +
+          geom_hline(yintercept = -log10(0.001), linetype = "dashed", color = "red") +
+          geom_vline(xintercept = c(-0.2, 0.2), linetype = "dashed", color = "red") +
+          theme_minimal() +
+          labs(title = paste(input$select_features1, input$select_specific_feature,
+                            "vs", input$select_features2),
+               x = "Effect Size",
+               y = "-log10(p-value)")
+      })
+    } else {
+      # Return empty plot if no results
+      library(ggplot2)
+      ggplot() +
+        annotate("text", x = 0, y = 0, label = "No significant associations found") +
+        theme_void()
+    }
   })
   
   output$volcano_plot <- renderPlot({

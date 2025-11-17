@@ -1,4 +1,8 @@
 # Modules/DrugFeature.R
+# Source required modules and functions
+source("Modules/DataAdapter.R")
+source("Functions/FeatureLoading.R")
+
 # UI Component
 uiDrugFeature <- function(id) {
   ns <- NS(id)
@@ -117,39 +121,42 @@ uiDrugFeature <- function(id) {
 serverDrugFeature <- function(input, output, session) {
   ns <- session$ns
   
-  # Update drug selection choices
+  # Update drug selection choices from DROMA database
   observe({
-    # Assuming drugs_search is available globally
-    if (exists("drugs_search")) {
-      choices_list <- drugs_search$drugs
-      updateSelectizeInput(session = session, inputId = 'select_drug',
-                           choices = choices_list, server = TRUE,
-                           options = list(placeholder = 'Please select a drug'))
-    } else {
-      warning("drugs_search object not found.")
-    }
-  })
+    drugs_available <- getAvailableFeatures("drug")
+
+    updateSelectizeInput(session = session, inputId = 'select_drug',
+                         choices = drugs_available, server = TRUE,
+                         options = list(placeholder = 'Please select a drug'))
+  }, once = TRUE)
   
-  # Process both datasets into a combined dataframe
+  # Process drug data using DROMA_R
   processed_data <- reactive({
     shiny::validate(
       shiny::need(input$select_drug != "", "Please select a drug.")
     )
-    
-    # Use the extracted function instead of inline code
-    process_drug_data(
+
+    # Convert filter parameters
+    data_type_filter <- if(input$filter_data_type == "all") NULL else input$filter_data_type
+    tumor_type_filter <- if(input$filter_tumor_type == "all") NULL else input$filter_tumor_type
+
+    # Use DROMA_R to get drug sensitivity data
+    drug_data <- getDrugData(
       drug_name = input$select_drug,
-      data_type = input$filter_data_type,
-      tumor_type = input$filter_tumor_type
+      data_type_filter = data_type_filter,
+      tumor_type_filter = tumor_type_filter
     )
+
+    return(drug_data)
   })
-  
-  # Merge with sample annotations
+
+  # Merge with sample annotations (DROMA_R already includes annotations)
   annotated_data <- reactive({
     req(processed_data())
-    
-    # Use the extracted function instead of inline code
-    annotate_drug_data(processed_data())
+
+    # DROMA_R's getDrugSensitivityData already includes annotations
+    # So we just return the processed data
+    return(processed_data())
   })
   
   # Drug sensitivity table

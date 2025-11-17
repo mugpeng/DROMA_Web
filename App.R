@@ -7,7 +7,11 @@ library(shinyjs)
 library(waiter) # wait while running
 library(DT)
 # library(shinydashboard)
-library(config)
+# Note: config library no longer needed - using direct database path
+
+# Load DROMA packages
+library(DROMA.Set)
+library(DROMA.R)
 
 # Manipulate data
 library(dplyr)
@@ -32,28 +36,21 @@ library(gg.gap)
 # Multithreads
 library(snowfall)
 library(parallel)
+library(future)
+library(furrr)
 
 ## Debug
 # library(reactlog)
 
-# Load ----
-config_list <- config::get(
-  # config = "test"
-  # Default is test mode
-)
+# Configuration ----
+# Note: Configuration is now handled directly in DataAdapter.R
+# The database path is set to "data/droma.sqlite"
 
-## Function----
-source("Package_Function/FuncGetData.R")
-source("Package_Function/FuncDrugOmicPair.R")
-source("Package_Function/FuncBatchFeature.R")
-source("Package_Function/FuncZscoreWhole.R")
-source("Package_Function/FuncPlot.R")
-source("Package_Function/FuncDrugFeature.R")
-source("Package_Function/FuncMisc.R")
+## Data Adapter ----
+source("Modules/DataAdapter.R")
 
-## Load Data and Preprocess ----
+## Load Data ----
 source("Modules/LoadData.R")
-source("Modules/Preprocess.R")
 
 # Welcome notification
 str1 <- "Nice to meet you."

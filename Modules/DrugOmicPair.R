@@ -1,3 +1,8 @@
+# Source required modules and functions
+source("Modules/DataAdapter.R")
+source("Functions/FeatureLoading.R")
+source("Functions/ZScoreNormalization.R")
+
 uiDrugOmicPair <- function(id){
   ns <- NS(id)
   fluidPage(
@@ -144,34 +149,39 @@ serverDrugOmicPair <- function(input, output, session){
   ## Omics ----
   omics_search_sel <- reactiveValues()
   observeEvent(input$select_omics, {
-    omics_search_sel$omics <- switch(input$select_omics, 
-                                     "mRNA" = omics_search[omics_search$type %in% "mRNA",]$omics,
-                                     "meth" = omics_search[omics_search$type %in% "meth",]$omics,
-                                     "proteinrppa" = omics_search[omics_search$type %in% "proteinrppa",]$omics,
-                                     "proteinms" = omics_search[omics_search$type %in% "proteinms",]$omics,
-                                     "cnv" = omics_search[omics_search$type %in% "cnv",]$omics,
-                                     "mutation_gene" = omics_search[omics_search$type %in% "mutation_gene",]$omics,
-                                     "mutation_site" = omics_search[omics_search$type %in% "mutation_site",]$omics,
-                                     "fusion" = omics_search[omics_search$type %in% "fusion",]$omics)
+    # Get available features for selected omic type from DROMA database
+    features <- getAvailableFeatures(input$select_omics)
+
+    omics_search_sel$omics <- features
+
     updateSelectizeInput(session = session, inputId = 'select_specific_omic',
-                         label = 'Molecule Selection:', choices = omics_search_sel$omics, server = TRUE,
+                         label = 'Molecule Selection:', choices = features, server = TRUE,
                          options = list(placeholder = 'Please select a molecular feature', onInitialize = I('function() { this.setValue(""); }')),
-                         selected = "ABCC3"
+                         selected = if(length(features) > 0) features[1] else ""
     )
-  })
-  
+  }, ignoreNULL = FALSE)
+
   ## Drugs ----
-  updateSelectizeInput(session = session, inputId = 'select_specific_drug',
-                       label = 'Drug Selection:', choices = drugs_search$drugs, server = TRUE,
-                       options = list(placeholder = 'Please select a drug', onInitialize = I('function() { this.setValue(""); }')),
-                       selected = "Sepantronium bromide"
-  )
+  # Get available drugs from DROMA database
+  observe({
+    drugs_available <- tryCatch({
+      getAvailableDrugs()
+    }, error = function(e) {
+      c("Sepantronium bromide", "Paclitaxel", "Cisplatin") # fallback
+    })
+
+    updateSelectizeInput(session = session, inputId = 'select_specific_drug',
+                         label = 'Drug Selection:', choices = drugs_available, server = TRUE,
+                         options = list(placeholder = 'Please select a drug', onInitialize = I('function() { this.setValue(""); }')),
+                         selected = if(length(drugs_available) > 0) drugs_available[1] else ""
+    )
+  }, once = TRUE)
   
-  # Calculate pair result and plot
+  # Calculate pair result and plot using DROMA_R
   selected_obj <- reactive({
     # React to z-score changes
     zscore_tracker()
-    
+
     # Check if drug is selected
     shiny::validate(
       shiny::need(input$select_specific_drug != "", "Please select a drug.")
@@ -187,18 +197,29 @@ serverDrugOmicPair <- function(input, output, session){
     if(exists("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)) {
       merged_enabled <- isTRUE(base::get("GLOBAL_ZSCORE_STATE", envir = .GlobalEnv)$enabled)
     }
-    
-    # Use the oneDrugOmicPair function which now uses our refactored functions internally
-    oneDrugOmicPair(input$select_omics, input$select_specific_omic,
-                   input$select_specific_drug,
-                   data_type = input$data_type, 
-                   tumor_type = input$tumor_type,
-                   merged_enabled = merged_enabled)
+
+    # Convert filter parameters
+    data_type_filter <- if(input$data_type == "all") NULL else input$data_type
+    tumor_type_filter <- if(input$tumor_type == "all") NULL else input$tumor_type
+
+    # Use DROMA_R analyzeDrugOmicPair function
+    result <- analyzeDrugOmicPairWrapper(
+      drug_name = input$select_specific_drug,
+      omic_type = input$select_omics,
+      omic_name = input$select_specific_omic,
+      data_type_filter = data_type_filter,
+      tumor_type_filter = tumor_type_filter,
+      merge_studies = merged_enabled,
+      output_option = "ggplot"
+    )
+
+    # Return in expected format
+    return(result)
   })
   
   output$patchPlot <- renderPlot({
     # modidy plot
-    plot_with_axis <- create_plot_with_common_axes(selected_obj()$plot, 
+    plot_with_axis <- DROMA.R::createPlotWithCommonAxes(selected_obj()$plot, 
                                                    x_title = "Molecular State(mRNA expression or Mutation status)", 
                                                    y_title = "drug sensitivity (higher indicates resistance)")
     plot_with_axis()
@@ -206,7 +227,7 @@ serverDrugOmicPair <- function(input, output, session){
   
   output$metaPlot <- renderPlot({
     req(selected_obj()$meta)  
-    create_forest_plot(selected_obj()$meta)
+    DROMA.R::createForestPlot(selected_obj()$meta)
   })
   
   # Add download handler
@@ -242,7 +263,7 @@ serverDrugOmicPair <- function(input, output, session){
              },
              "meta" = {
                pdf(file = filename, width = 10, height = 6)
-               create_forest_plot(selected_obj()$meta)
+               DROMA.R::createForestPlot(selected_obj()$meta)
                dev.off()
              }
       )

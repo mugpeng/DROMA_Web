@@ -117,10 +117,57 @@ serverStatAnno <- function(input, output, session){
   output$p_drug_moa <- renderPlot({
     p_drug_moa
   })
-  # Table ----
-  output$drug_anno <- DT::renderDataTable({ 
+  # Get data from DROMA database
+  sample_metadata <- reactive({
+    getSampleMetadata()
+  })
+
+  drug_metadata <- reactive({
+    getTreatmentMetadata()
+  })
+
+  # Generate statistical plots using DROMA_R
+  observe({
+    if (.dromadata$initialized) {
+      tryCatch({
+        # Use DROMA_R to generate statistical plots
+        plots <- DROMA.R::generateStatisticalPlots(
+          projects = "all",
+          connection = .dromadata$connection,
+          plot_types = "all"
+        )
+
+        # Store plots for output
+        p_count_drugandsample_facet_with_gap <<- plots$sample_drug_counts_facet
+        p_count_drugandsample_sum_with_gap2 <<- plots$sample_drug_counts_summary
+        p_mol_character <<- plots$molecular_characteristics
+        p_overlap_drug <<- plots$drug_overlap
+        p_overlap_sample <<- plots$sample_overlap
+        p_tumor_bubble <<- plots$tumor_type_bubble
+        p_drug_moa <<- plots$drug_moa
+
+      }, error = function(e) {
+        # Create placeholder plots if DROMA_R function fails
+        library(ggplot2)
+        empty_plot <- ggplot() + theme_void() +
+          annotate("text", x = 0.5, y = 0.5,
+                   label = "Statistical plots will be available\nafter full DROMA integration")
+
+        p_count_drugandsample_facet_with_gap <<- empty_plot
+        p_count_drugandsample_sum_with_gap2 <<- empty_plot
+        p_mol_character <<- empty_plot
+        p_overlap_drug <<- empty_plot
+        p_overlap_sample <<- empty_plot
+        p_tumor_bubble <<- empty_plot
+        p_drug_moa <<- empty_plot
+      })
+    }
+  })
+
+  # Table outputs using DROMA data
+  output$drug_anno <- DT::renderDataTable({
     DT::datatable(
-      drug_anno,
+      drug_metadata(),
       caption = htmltools::tags$caption(
         style = 'caption-side: top; text-align: left; color: black; font-size: 14px;',
         htmltools::strong("Drug Annotation Data")
@@ -136,10 +183,10 @@ serverStatAnno <- function(input, output, session){
       filter = 'top'
     )
   })
-  
-  output$sample_anno <- DT::renderDataTable({ 
+
+  output$sample_anno <- DT::renderDataTable({
     DT::datatable(
-      sample_anno,
+      sample_metadata(),
       caption = htmltools::tags$caption(
         style = 'caption-side: top; text-align: left; color: black; font-size: 14px;',
         htmltools::strong("Sample Annotation Data")
@@ -171,8 +218,8 @@ serverStatAnno <- function(input, output, session){
       type <- input$sample_download_type
       
       switch(type,
-             "data_rds" = saveRDS(sample_anno, filename),
-             "data_csv" = write.csv(sample_anno, filename, row.names = FALSE)
+             "data_rds" = saveRDS(sample_metadata(), filename),
+             "data_csv" = write.csv(sample_metadata(), filename, row.names = FALSE)
       )
     }
   )
@@ -192,8 +239,8 @@ serverStatAnno <- function(input, output, session){
       type <- input$drug_download_type
       
       switch(type,
-             "data_rds" = saveRDS(drug_anno, filename),
-             "data_csv" = write.csv(drug_anno, filename, row.names = FALSE)
+             "data_rds" = saveRDS(drug_metadata(), filename),
+             "data_csv" = write.csv(drug_metadata(), filename, row.names = FALSE)
       )
     }
   )

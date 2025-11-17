@@ -1,3 +1,7 @@
+# Source required functions
+source("Modules/DataAdapter.R")
+source("Functions/ZScoreNormalization.R")
+
 # UI component for Global Settings
 uiGlobalSetting <- function(id) {
   ns <- NS(id)
@@ -78,20 +82,11 @@ serverGlobalSetting <- function(input, output, session) {
   # Apply z-score on initialization
   observe({
     # Only run once on initialization
-    if (!exists("normalization_state", envir = .GlobalEnv) || 
+    if (!exists("normalization_state", envir = .GlobalEnv) ||
         !isTRUE(base::get("normalization_state", envir = .GlobalEnv))) {
-      # Source z-score module
-      if (!exists("apply_zscore_normalization", envir = .GlobalEnv)) {
-        source("Package_Function/FuncZscoreWhole.R", local = FALSE)
-      }
-      # Apply z-score normalization
-      apply_zscore_normalization()
-      
-      # Set global z-score state for other modules to check
-      assign("GLOBAL_ZSCORE_STATE", list(
-        enabled = TRUE,
-        timestamp = Sys.time()
-      ), envir = .GlobalEnv)
+
+      # Apply z-score normalization using centralized function
+      applyZScoreNormalization()
     }
   }, priority = 1000)
   
@@ -134,17 +129,11 @@ serverGlobalSetting <- function(input, output, session) {
         footer = NULL
       ))
       
-      # Source z-score module if needed
-      if (!exists("apply_zscore_normalization", envir = .GlobalEnv) || 
-          !exists("reset_to_original", envir = .GlobalEnv)) {
-        source("Package_Function/FuncZscoreWhole.R", local = FALSE)
-      }
-      
-      # Apply appropriate normalization
+      # Apply appropriate normalization using centralized functions
       if (rv$zscore_enabled) {
-        apply_zscore_normalization()
+        applyZScoreNormalization()
       } else {
-        reset_to_original()
+        resetToOriginal()
       }
       
       # Update timestamp to trigger reactivity in other modules
