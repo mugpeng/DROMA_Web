@@ -1,3 +1,7 @@
+# CAUTION
+A version with a better design, cleaner structure, and AI enable will be release soon.
+This repository will **NOT** be updated and maintained anymore. See you in the new version :). Bye. Peng, 20251117
+
 [![Website](https://img.shields.io/website?url=https%3A//droma01.github.io/DROMA/)](https://droma01.github.io/DROMA/)
 [![R](https://img.shields.io/badge/R-4.0+-blue.svg)](https://www.r-project.org/)
 [![Shiny](https://img.shields.io/badge/Shiny-1.0+-green.svg)](https://shiny.rstudio.com/)
