@@ -1,4 +1,8 @@
-# DROMA-DB: Drug Response Omics Association Map, Database
+# CAUTION
+A version with a better design, cleaner structure, and AI enable will be release soon.
+This repository will **NOT** be updated and maintained anymore. See you in the new version :). Bye. Peng, 20251117
+
+# DROMA-Web: Drug Response Omics Association Map, Database
 
 ![image](https://github.com/user-attachments/assets/000473aa-7869-41c8-9352-e8481ba922fa)
 
