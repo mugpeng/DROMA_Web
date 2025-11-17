@@ -12,13 +12,25 @@
 initializeDROMAData <- function() {
   if (!.dromadata$initialized) {
     tryCatch({
-      # Direct path to DROMA SQLite database
-      db_path <- "data/droma.sqlite"
-
+      # Load database path from config.yml
+      if (requireNamespace("config", quietly = TRUE)) {
+        config_data <- config::get()
+        db_path <- config_data$database_path
+      } else {
+        # Fallback to default path if config package not available
+        db_path <- "data/droma.sqlite"
+      }
+      
+      # Normalize path (handle relative paths)
+      if (!file.exists(db_path)) {
+        # Try relative to current working directory
+        db_path <- normalizePath(file.path(getwd(), db_path), mustWork = FALSE)
+      }
+      
       # Check if database exists
       if (!file.exists(db_path)) {
         stop("DROMA database not found at: ", db_path,
-             "\nPlease ensure droma.sqlite is in the data/ directory")
+             "\nPlease check config.yml or ensure droma.sqlite is in the data/ directory")
       }
 
       # Connect to database
@@ -206,10 +218,7 @@ convertToLegacyFormat <- function(data) {
   if (is(data, "DromaSet") || is(data, "MultiDromaSet")) {
     # Extract relevant information and convert to list/data frame
     # This is a simplified conversion - adjust based on actual needs
-    return(list(
-      data = data,
-      # Add any other necessary fields
-    ))
+    return(list(data = data))
   }
 
   return(data)

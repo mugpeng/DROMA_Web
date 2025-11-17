@@ -1,5 +1,6 @@
 default:
-  test_mode: F
+  database_path: "data/droma.sqlite"
 
 test:
-  test_mode: T
+  database_path: "data/droma.sqlite"
+

@@ -7,7 +7,7 @@ library(shinyjs)
 library(waiter) # wait while running
 library(DT)
 # library(shinydashboard)
-# Note: config library no longer needed - using direct database path
+# Note: config library is used in DataAdapter.R for database path configuration
 
 # Load DROMA packages
 library(DROMA.Set)
@@ -43,8 +43,8 @@ library(furrr)
 # library(reactlog)
 
 # Configuration ----
-# Note: Configuration is now handled directly in DataAdapter.R
-# The database path is set to "data/droma.sqlite"
+# Note: Configuration is handled in DataAdapter.R using config.yml
+# Database path can be configured in config.yml file
 
 ## Data Adapter ----
 source("Modules/DataAdapter.R")

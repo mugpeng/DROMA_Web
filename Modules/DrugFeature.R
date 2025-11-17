@@ -2,6 +2,7 @@
 # Source required modules and functions
 source("Modules/DataAdapter.R")
 source("Functions/FeatureLoading.R")
+source("Functions/DrugFeatureHelpers.R")
 
 # UI Component
 uiDrugFeature <- function(id) {
@@ -163,8 +164,8 @@ serverDrugFeature <- function(input, output, session) {
   output$drug_table <- DT::renderDataTable({
     req(processed_data())
     
-    # Use the extracted function instead of inline code
-    format_drug_table(
+    # Use DROMA_R package function
+    DROMA.R::formatDrugTable(
       processed_data(),
       caption = "Drug sensitivity data - showing both raw and Z-score normalized values"
     )
@@ -174,8 +175,8 @@ serverDrugFeature <- function(input, output, session) {
   output$annotated_drug_table <- DT::renderDataTable({
     req(annotated_data())
     
-    # Use the extracted function instead of inline code
-    format_drug_table(
+    # Use DROMA_R package function
+    DROMA.R::formatDrugTable(
       annotated_data(),
       caption = "Drug sensitivity with sample annotations - showing both raw and Z-score normalized values"
     )
